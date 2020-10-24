@@ -1,0 +1,30 @@
+from distutils.core import setup
+
+setup(
+    name='reddit-detective',
+    packages=['reddit_detective'],
+    version='0.1.0',
+    license='MIT',
+    description='Play detective on Reddit',
+    author='Ümit Kaan Usta',
+    author_email='u.kaanusta@gmail.com',
+    url='https://github.com/umitkaanusta/reddit-detective',
+    download_url='https://github.com/umitkaanusta/reddit-detective/archive/v0.1.0.tar.gz',
+    keywords=["reddit", "data", "analysis", "analytics", "social",
+              "network", "graph", "neo4j", "media", "news", "politics"],
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Developers',
+        'Intended Audience :: Education',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Scientific/Engineering :: Information Analysis',
+        'Topic :: Sociology',
+        'Topic :: Education',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+    ],
+)
