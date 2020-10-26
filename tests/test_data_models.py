@@ -1,8 +1,11 @@
 import praw
-from pprint import pprint
 
 from reddit_detective.data_models import Authored, CommentData, Submission, Subreddit, Redditor
 from tests import api_
+
+"""
+Testing the basic properties/methods of data models and abstract classes
+"""
 
 
 def test_subreddit():
@@ -49,10 +52,10 @@ def test_cypher_codes_node():
     assert sub.properties["id"] in sub.props_code()
     assert ":" in sub.props_code()
     assert "{" in sub.props_code() and "}" in sub.props_code()
-    assert sub.merge_node_code()
-    assert "MERGE" in sub.merge_node_code()
-    assert sub.types_code() in sub.merge_node_code()
-    assert sub.props_code() in sub.merge_node_code()
+    assert sub.merge_code()
+    assert "MERGE" in sub.merge_code()
+    assert sub.types_code() in sub.merge_code()
+    assert sub.props_code() in sub.merge_code()
 
 
 def test_cypher_codes_rel():
