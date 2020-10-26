@@ -1,9 +1,6 @@
-from tests.test_data_models import *
+from tests import test_data_models
 
 if __name__ == '__main__':
     print("Testing Data Models...")
-    test_redditor()
-    test_submission()
-    test_subreddit()
-    test_cypher_codes_node()
+    test_data_models.run()
     print("Testing Data models - Success!")
