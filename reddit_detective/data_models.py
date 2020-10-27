@@ -1,6 +1,6 @@
 import praw
+from prawcore.exceptions import Redirect
 from abc import ABC
-from enum import Enum
 
 from reddit_detective.utils import strip_punc
 
@@ -19,11 +19,11 @@ Node types:
         Over18
         
 Relationship types:
-    MODERATES (Redditor -> Subreddit)
-    UNDER (Submission -> Subreddit)
-    COMMENTED (Redditor -> Submission)
-    REPLIED (Redditor -> Redditor)
-    AUTHORED (Redditor -> Submission)
+    MODERATES (Redditor -> Subreddit) (No properties)
+    UNDER (Submission -> Subreddit) (No properties)
+    COMMENTED (Redditor -> Submission) (Use properties of CommentData)
+    REPLIED (Redditor -> Redditor) (Use properties of CommentData)
+    AUTHORED (Redditor -> Submission) (No properties)
     
 Textual properties are stripped from punctuation marks to 
 better comply with how Cypher deals with strings,
@@ -38,6 +38,8 @@ class CommentData:
     """
     Holds code generation methods and data of comments
     NOT A NODE, just a helper class to hold comment data
+
+    Then why inherits from Node? Just for Cypher code generation methods
     """
     def __init__(self, api: praw.Reddit, id_):
         self.api = api
@@ -220,7 +222,7 @@ class Submission(Node):
             "over18": self.resp.over_18,
             "score": self.resp.score,
             "upvote_ratio": self.resp.upvote_ratio,
-            "edited": self.resp.edited
+            "edited": self.resp.edited,
         }
 
     @property
@@ -232,6 +234,14 @@ class Submission(Node):
     def subreddit(self):
         sub = self.resp.subreddit.id
         return Subreddit(self.api, sub, limit=None)
+
+    @property
+    def subreddit_id(self):
+        return self.resp.subreddit.id
+
+    @property
+    def author_id(self):
+        return self.resp.author.id
 
     def comments(self):
         """
@@ -308,7 +318,7 @@ class Redditor(Node):
         return f"Redditor({self.name})"
 
 
-class Relationships(Enum):
+class Relationships:
     moderates = "MODERATES"
     under = "UNDER"
     commented = "COMMENTED"
