@@ -309,8 +309,8 @@ class Redditor(Node):
 
 
 class Relationships(Enum):
-    moderates = "MODERATES",
-    under = "UNDER",
-    commented = "COMMENTED",
-    authored = "AUTHORED",
+    moderates = "MODERATES"
+    under = "UNDER"
+    commented = "COMMENTED"
+    authored = "AUTHORED"
     replied = "REPLIED"
