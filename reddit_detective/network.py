@@ -14,11 +14,11 @@ class RedditNetwork:
             self,
             api: praw.Reddit,
             driver: GraphDatabase,
-            components: List[Union[Subreddit, Submission, Redditor]]
+            starting_points: List[Union[Subreddit, Submission, Redditor]]
     ):
         self.api = api
         self.driver = driver
-        self.components = components
+        self.starting_points = starting_points
 
     def cypher_code(self):
         """

@@ -1,5 +1,8 @@
 import praw
 from abc import ABC
+from enum import Enum
+
+from reddit_detective.utils import strip_punc
 
 """
 Node types:
@@ -16,11 +19,15 @@ Node types:
         Over18
         
 Relationship types:
-    MODERATES (Redditor -> Subreddit):
-    UNDER (Submission -> Subreddit):
-    COMMENTED (Redditor -> Submission):
-    REPLIED (Redditor -> Redditor):
-    AUTHORED (Redditor -> Submission):
+    MODERATES (Redditor -> Subreddit)
+    UNDER (Submission -> Subreddit)
+    COMMENTED (Redditor -> Submission)
+    REPLIED (Redditor -> Redditor)
+    AUTHORED (Redditor -> Submission)
+    
+Textual properties are stripped from punctuation marks to 
+better comply with how Cypher deals with strings,
+with a similar mindset with how Alexander solved the Gordian Knot.
 """
 
 _ACCEPTED_INDEXES = ["hot", "new", "controversial", "top"]  # Do NOT alter this
@@ -30,6 +37,7 @@ _ACCEPTED_TIME_FILTERS = ["all", "hour", "day", "week", "month", "year"]  # Do N
 class CommentData:
     """
     Holds code generation methods and data of comments
+    NOT A NODE, just a helper class to hold comment data
     """
     def __init__(self, api: praw.Reddit, id_):
         self.api = api
@@ -41,7 +49,7 @@ class CommentData:
         return {
             "id": self.resp.id,
             "edited": self.resp.edited,
-            "text": self.resp.body,
+            "text": strip_punc(self.resp.body),
             "is_submitter": self.resp.is_submitter,
             "score": self.resp.score,
             "stickied": self.resp.stickied
@@ -126,7 +134,7 @@ class Node(ABC):
         keys, values = zip(*self.properties.items())
         props_str = ""
         for i in range(len(keys)):
-            value_ = f"'{values[i]}'" if type(values[i]) == str else values[i]
+            value_ = f"\"{values[i]}\"" if type(values[i]) == str else values[i]
             # Replace \n with two spaces
             prop = f"{keys[i]}: " + str(value_).replace("\n", "  ") + ","
             props_str += prop + " "
@@ -163,7 +171,7 @@ class Subreddit(Node):
             "created_utc": self.resp.created_utc,
             "name": self.resp.display_name,
             "over18": self.resp.over18,
-            "desc": self.resp.description,
+            "desc": strip_punc(self.resp.description),
             "subscribers": self.resp.subscribers,
             "submissions": {
                 "new": self.resp.new(limit=self.limit),
@@ -204,8 +212,8 @@ class Submission(Node):
         return {
             "id": self.resp.id,
             "created_utc": self.resp.created_utc,
-            "title": self.resp.title,
-            "text": self.resp.selftext,
+            "title": strip_punc(self.resp.title),
+            "text": strip_punc(self.resp.selftext),
             "archived": self.resp.archived,
             "stickied": self.resp.stickied,
             "locked": self.resp.locked,
@@ -300,61 +308,9 @@ class Redditor(Node):
         return f"Redditor({self.name})"
 
 
-class Relationship(ABC):
-    """
-    Abstract class to implement common properties of relationships
-    and methods for Cypher code generation
-
-    Relationships are always directional in Neo4j
-    """
-    def __init__(self, api, left_node: Node, right_node: Node, props: dict):
-        self.api = api
-        self.left_node = left_node
-        self.right_node = right_node
-        self.props = props
-
-    def merge_code(self):
-        """
-        Create 2 nodes and form a relationship between them with MERGE keyword
-        """
-        return (f"MERGE {self.left_node.code()}"
-                f"-[:{self.rel_type}]->"
-                f"{self.right_node.code()}")
-
-    def __str__(self):
-        return f"{self.left_node}-{self.rel_type}->{self.right_node}"
-
-
-class Under(Relationship):
-    rel_type = "UNDER"
-
-    def __init__(self, api, submission, subreddit, props):
-        super(Under, self).__init__(api, submission, subreddit, props)
-
-
-class Moderates(Relationship):
-    rel_type = "MODERATES"
-
-    def __init__(self, api, redditor, subreddit, props):
-        super(Moderates, self).__init__(api, redditor, subreddit, props)
-
-
-class Authored(Relationship):
-    rel_type = "AUTHORED"
-
-    def __init__(self, api, redditor, submission, props):
-        super(Authored, self).__init__(api, redditor, submission, props)
-
-
-class Commented(Relationship):
-    rel_type = "COMMENTED"
-
-    def __init__(self, api, redditor, submission, props):
-        super(Commented, self).__init__(api, redditor, submission, props)
-
-
-class Replied(Relationship):
-    rel_type = "REPLIED"
-
-    def __init__(self, api, redditor_from, redditor_to, props):
-        super(Replied, self).__init__(api, redditor_from, redditor_to, props)
+class Relationships(Enum):
+    moderates = "MODERATES",
+    under = "UNDER",
+    commented = "COMMENTED",
+    authored = "AUTHORED",
+    replied = "REPLIED"
