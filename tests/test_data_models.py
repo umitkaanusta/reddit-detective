@@ -1,6 +1,6 @@
 import praw
 
-from reddit_detective.data_models import Authored, CommentData, Submission, Subreddit, Redditor
+from reddit_detective.data_models import CommentData, Submission, Subreddit, Redditor
 from tests import api_
 
 """
@@ -58,19 +58,8 @@ def test_cypher_codes_node():
     assert sub.props_code() in sub.merge_code()
 
 
-def test_cypher_codes_rel():
-    sub = Submission(api_, "hfulq4", limit=100)
-    red = Redditor(api_, "Anub_Rekhan", limit=100)
-    auth = Authored(api_, red, sub, sub.properties)
-    assert auth.rel_type == "AUTHORED"
-    assert auth.left_node.code() in auth.merge_code()
-    assert auth.rel_type in auth.merge_code()
-    assert auth.right_node.code() in auth.merge_code()
-
-
 def run():
     test_subreddit()
     test_submission()
     test_redditor()
     test_cypher_codes_node()
-    test_cypher_codes_rel()
