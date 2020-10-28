@@ -34,48 +34,6 @@ _ACCEPTED_INDEXES = ["hot", "new", "controversial", "top"]  # Do NOT alter this
 _ACCEPTED_TIME_FILTERS = ["all", "hour", "day", "week", "month", "year"]  # Do NOT alter this
 
 
-class CommentData:
-    """
-    Holds code generation methods and data of comments
-    NOT A NODE, just a helper class to hold comment data
-
-    Then why inherits from Node? Just for Cypher code generation methods
-    """
-    def __init__(self, api: praw.Reddit, id_):
-        self.api = api
-        self.id = id_
-        self.resp = api.comment(id_)
-
-    @property
-    def properties(self):
-        return {
-            "id": self.resp.id,
-            "edited": self.resp.edited,
-            "text": strip_punc(self.resp.body),
-            "is_submitter": self.resp.is_submitter,
-            "score": self.resp.score,
-            "stickied": self.resp.stickied
-        }
-
-    @property
-    def author(self):
-        username = self.resp.author.name
-        return Redditor(self.api, username, limit=None)
-
-    @property
-    def submission(self):
-        submission = self.resp.submission.id
-        return Submission(self.api, submission, limit=None)
-
-    @property
-    def subreddit(self):
-        subreddit = self.resp.subreddit.display_name
-        return Subreddit(self.api, subreddit, limit=None)
-
-    def replies(self):
-        return list(self.resp.replies)
-
-
 class Node(ABC):
     """
     Abstract class to implement common properties of nodes
@@ -84,19 +42,16 @@ class Node(ABC):
     self.data is the filtered version of the output we get from Reddit API
     self.properties are the properties we're gonna show at the Graph Database
     """
-    def __init__(self, api: praw.Reddit, name, limit, indexing, time_filter, degree):
+    def __init__(self, api: praw.Reddit, name, limit, indexing, time_filter):
         if indexing not in _ACCEPTED_INDEXES:
             raise ValueError(f"reddit_detective only accepts {_ACCEPTED_INDEXES} as indexes")
         if time_filter not in _ACCEPTED_TIME_FILTERS:
             raise ValueError(f"reddit_detective only accepts {_ACCEPTED_TIME_FILTERS} as time filters")
-        if degree not in self.available_degrees:
-            raise ValueError(f"{self.main_type} only accepts {self.available_degrees} as degrees")
         self.api = api
         self.name = name
         self.limit = limit
         self.indexing = indexing
         self.time_filter = time_filter
-        self.degree = degree
 
     @property
     def types(self):
@@ -162,8 +117,8 @@ class Subreddit(Node):
     available_types = ["Over18"]
     available_degrees = ["submissions", "comments", "replies"]
 
-    def __init__(self, api, name, limit, indexing="hot", time_filter="all", degree="comments"):
-        super(Subreddit, self).__init__(api, name, limit, indexing, time_filter, degree)
+    def __init__(self, api, name, limit, indexing="hot", time_filter="all"):
+        super(Subreddit, self).__init__(api, name, limit, indexing, time_filter)
         self.resp = self.api.subreddit(self.name)
 
     @property
@@ -205,8 +160,8 @@ class Submission(Node):
     available_types = ["Archived", "Stickied", "Locked", "Over18"]
     available_degrees = ["comments", "replies"]
 
-    def __init__(self, api, name, limit, indexing="hot", time_filter="all", degree="comments"):
-        super(Submission, self).__init__(api, name, limit, indexing, time_filter, degree)
+    def __init__(self, api, name, limit, indexing="hot", time_filter="all"):
+        super(Submission, self).__init__(api, name, limit, indexing, time_filter)
         self.resp = self.api.submission(self.name)
 
     @property
@@ -220,8 +175,8 @@ class Submission(Node):
             "stickied": self.resp.stickied,
             "locked": self.resp.locked,
             "over18": self.resp.over_18,
-            "score": self.resp.score,
-            "upvote_ratio": self.resp.upvote_ratio,
+            # "score": self.resp.score,
+            # "upvote_ratio": self.resp.upvote_ratio,
             "edited": self.resp.edited,
         }
 
@@ -240,16 +195,15 @@ class Submission(Node):
         return self.resp.subreddit.id
 
     @property
+    def subreddit_name(self):
+        return self.resp.subreddit.display_name
+
+    @property
     def author_id(self):
         return self.resp.author.id
 
     def comments(self):
-        """
-        Returns the comments of the user as a list of CommentData objects
-        """
-        c = list(self.resp.comments)
-        comments_data = [CommentData(self.api, comm.id) for comm in c]
-        return comments_data
+        return list(self.resp.comments)
 
     def __str__(self):
         return f"Submission(id={self.name})"
@@ -262,8 +216,8 @@ class Redditor(Node):
     available_types = ["Employee", "Mod", "Gold"]
     available_degrees = ["submissions", "comments", "replies"]
 
-    def __init__(self, api, name, limit, indexing="hot", time_filter="all", degree="comments"):
-        super(Redditor, self).__init__(api, name, limit, indexing, time_filter, degree)
+    def __init__(self, api, name, limit, indexing="hot", time_filter="all"):
+        super(Redditor, self).__init__(api, name, limit, indexing, time_filter)
         self.resp = self.api.redditor(self.name)
 
     @property
@@ -273,8 +227,8 @@ class Redditor(Node):
             "username": self.resp.name,
             "created_utc": self.resp.created_utc,
             "has_verified_email": self.resp.has_verified_email,
-            "comment_karma": self.resp.comment_karma,
-            "link_karma": self.resp.link_karma,
+            # "comment_karma": self.resp.comment_karma,
+            # "link_karma": self.resp.link_karma,
             "employee": self.resp.is_employee,
             "mod": self.resp.is_mod,
             "gold": self.resp.is_gold,
@@ -307,15 +261,37 @@ class Redditor(Node):
         return [Submission(self.api, id_, limit=None) for id_ in ids]
 
     def comments(self):
-        """
-        Returns the comments of the user as a list of CommentData objects
-        """
-        c = list(self.data["comments"][self.indexing])
-        comments_data = [CommentData(self.api, comm.id) for comm in c]
-        return comments_data
+        return list(self.data["comments"][self.indexing])
 
     def __str__(self):
         return f"Redditor({self.name})"
+
+
+class CommentData(Node):
+    """
+    Holds code generation methods and data of comments
+    NOT A NODE, just a helper class to hold comment data
+
+    Then why inherits from Node? Just for Cypher code generation methods
+    """
+    def __init__(self, api: praw.Reddit, id_):
+        self.api = api
+        self.id = id_
+        self.resp = api.comment(id_)
+
+    @property
+    def properties(self):
+        return {
+            "id": self.resp.id,
+            "edited": self.resp.edited,
+            "text": strip_punc(self.resp.body),
+            "is_submitter": self.resp.is_submitter,
+            # "score": self.resp.score,
+            "stickied": self.resp.stickied
+        }
+
+    def replies(self):
+        return list(self.resp.replies)
 
 
 class Relationships:
