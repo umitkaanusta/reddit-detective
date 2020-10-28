@@ -1,7 +1,7 @@
 import praw
 
-from reddit_detective.data_models import Subreddit
-from reddit_detective.relationships import Submissions
+from reddit_detective.data_models import Redditor, Subreddit
+from reddit_detective.relationships import Comments, Submissions
 from tests import api_
 
 """
@@ -19,14 +19,27 @@ from tests import api_
 
 
 def test_submissions():
-    sub = Subreddit(api_, "learnpython", limit=5, degree="submissions")
-    submissions = Submissions(sub)
-    code = Submissions(sub).code()
-    assert "MERGE" in code
-    assert "WITH" in code
-    assert submissions._link_subs_to_subreddit() in code
-    assert submissions._link_subs_to_authors() in code
+    red = Redditor(api_, "Anub_Rekhan", limit=5)
+    submissions_red = Submissions(red)
+    sub = Subreddit(api_, "learnpython", limit=5)
+    submissions_sub = Submissions(sub)
+    # print(submissions_red.code())
+    # print(submissions_sub.code())
+    assert submissions_red.code()
+    assert submissions_sub.code()
+
+
+def test_comments():
+    red = Redditor(api_, "Anub_Rekhan", limit=10, indexing="new")
+    comments_red = Comments(red)
+    assert comments_red.comments()
+    assert comments_red.comment_authors()
+    assert comments_red.comment_subs()
+    assert comments_red._merge_nodes()
+    assert comments_red.code()
+    # print(comments_red.code())
 
 
 def run():
     test_submissions()
+    test_comments()
