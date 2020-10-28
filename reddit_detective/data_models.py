@@ -57,7 +57,9 @@ class Node(ABC):
     def types(self):
         type_list = [self.main_type]
         for type_ in self.available_types:
-            if self.data[type_.lower()]:
+            if self.data[type_.lower()] == "True":
+                # Boolean values are converted to str cause
+                # Sometimes some data returns None but Neo4j does not recognize None as a type
                 type_list.append(type_)
         return type_list
 
@@ -126,10 +128,10 @@ class Subreddit(Node):
         return {
             "id": self.resp.id,
             "created_utc": self.resp.created_utc,
-            "name": self.resp.display_name,
-            "over18": self.resp.over18,
-            "desc": strip_punc(self.resp.description),
-            "subscribers": self.resp.subscribers,
+            "name": str(self.resp.display_name),
+            "over18": str(self.resp.over18),
+            "desc": str(strip_punc(self.resp.description)),
+            # "subscribers": self.resp.subscribers,
             "submissions": {
                 "new": self.resp.new(limit=self.limit),
                 "hot": self.resp.hot(limit=self.limit),
@@ -169,15 +171,15 @@ class Submission(Node):
         return {
             "id": self.resp.id,
             "created_utc": self.resp.created_utc,
-            "title": strip_punc(self.resp.title),
-            "text": strip_punc(self.resp.selftext),
-            "archived": self.resp.archived,
-            "stickied": self.resp.stickied,
-            "locked": self.resp.locked,
-            "over18": self.resp.over_18,
+            "title": str(strip_punc(self.resp.title)),
+            "text": str(strip_punc(self.resp.selftext)),
+            "archived": str(self.resp.archived),
+            "stickied": str(self.resp.stickied),
+            "locked": str(self.resp.locked),
+            "over18": str(self.resp.over_18),
             # "score": self.resp.score,
             # "upvote_ratio": self.resp.upvote_ratio,
-            "edited": self.resp.edited,
+            # "edited": str(self.resp.edited),
         }
 
     @property
@@ -224,14 +226,14 @@ class Redditor(Node):
     def data(self):
         return {
             "id": self.resp.id,
-            "username": self.resp.name,
+            "username": str(self.resp.name),
             "created_utc": self.resp.created_utc,
-            "has_verified_email": self.resp.has_verified_email,
+            "has_verified_email": str(self.resp.has_verified_email),
             # "comment_karma": self.resp.comment_karma,
             # "link_karma": self.resp.link_karma,
-            "employee": self.resp.is_employee,
-            "mod": self.resp.is_mod,
-            "gold": self.resp.is_gold,
+            "employee": str(self.resp.is_employee),
+            # "mod": str(self.resp.is_mod),
+            # "gold": str(self.resp.is_gold),
             "submissions": {
                 "new": self.resp.submissions.new(limit=self.limit),
                 "hot": self.resp.submissions.hot(limit=self.limit),
@@ -283,11 +285,11 @@ class CommentData(Node):
     def properties(self):
         return {
             "id": self.resp.id,
-            "edited": self.resp.edited,
+            # "edited": str(self.resp.edited),
             "text": strip_punc(self.resp.body),
-            "is_submitter": self.resp.is_submitter,
+            "is_submitter": str(self.resp.is_submitter),
             # "score": self.resp.score,
-            "stickied": self.resp.stickied
+            "stickied": str(self.resp.stickied)
         }
 
     def replies(self):

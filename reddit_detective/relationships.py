@@ -73,8 +73,7 @@ class Submissions:
                       for sub in start.submissions())
         submissions = set(sub.merge_code() for sub in start.submissions())
         authors = set(sub.author.merge_code() for sub in start.submissions())
-        code_str = (f"{start.merge_code()}\n"
-                    + "\n".join(submissions)
+        code_str = ("\n".join(submissions)
                     + "\n" + "\n".join(subreddits)
                     + "\n" + "\n".join(authors) + ";")
         return code_str
@@ -142,8 +141,7 @@ class Comments(Submissions):
         authors = set(authors)
         # Adding commentor users
         commentors = set(auth.merge_code() for auth in self.comment_authors())
-        code_str = (f"{start.merge_code()}\n"
-                    + "\n".join(submissions)
+        code_str = ("\n".join(submissions)
                     + "\n" + "\n".join(subreddits)
                     + "\n" + "\n".join(authors)
                     + "\n" + "\n".join(commentors) + ";")
@@ -155,4 +153,54 @@ class Comments(Submissions):
         code_str += self._link_subs_to_subreddit(additional_subs=self.comment_subs())
         code_str += self._link_subs_to_authors(additional_subs=self.comment_subs())
         code_str += self._link_redditors_to_subs()
+        return code_str
+
+
+class CommentsReplies(Comments):
+    """
+    Note that CommentsReplies has a higher time complexity
+    
+    Degree 3: Replies
+    Starting points: Subreddit, Submission, Redditor
+        All of Degree 2
+        For all comments, get the list of replies
+        Link redditors to redditors thru which one replied to other (REPLIED)
+    """
+    def __init__(self, starting_point: Union[Subreddit, Submission, Redditor]):
+        if "replies" not in starting_point.available_degrees:
+            # if starting point is not Subreddit, Submission or Redditor:
+            raise TypeError("the type of the starting point should be either "
+                            "Subreddit, Submission or Redditor")
+        self.start = starting_point
+
+    def reply_authors(self):
+        """
+        Get list of replying users for each comment
+        """
+        authors = []
+        replies = [comm.replies() for comm in self.comments()]
+        for reply_list in replies:
+            for i in range(len(reply_list)):
+                reply = reply_list[i]
+                reply_list[i] = Redditor(self.start.api, reply.author.id, limit=None)
+            authors.append(reply_list)
+        return authors
+
+    def _link_redditors_to_redditors(self):
+        code_str = ""
+        comments = self.comments()
+        for i in range(len(comments)):
+            replies = comments[i].replies
+            for j in range(len(replies)):
+                code_str += _link_nodes(
+                    comments[i].author.id,
+                    replies[j].author.id,
+                    Relationships.replied,
+                    CommentData(self.start.api, replies[j].id).props_code()
+                )
+        return code_str
+
+    def code(self):
+        code_str = super().code()
+        code_str += "\n" + self._link_redditors_to_redditors()
         return code_str
