@@ -1,5 +1,6 @@
 import json
 import praw
+from neo4j import GraphDatabase
 
 from reddit_detective import VERSION
 
