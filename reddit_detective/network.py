@@ -20,7 +20,7 @@ class RedditNetwork:
 
     def _codes(self):
         """
-        Get codes for every starting point
+        Get codes for every component
         """
         codes = list(chain.from_iterable([point.code() for point in self.components]))
         # Remove duplicates without changing order

@@ -1,5 +1,4 @@
-import re
-
-
-def strip_punc(str_):
-    return re.sub(r"[^\w\s]", "", str_)
+def strip_quotes(str_):
+    str_ = str_.replace("\'", "")
+    str_ = str_.replace("\"", "")
+    return str_

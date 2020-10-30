@@ -2,14 +2,14 @@ import praw
 from prawcore.exceptions import Redirect
 from abc import ABC
 
-from reddit_detective.utils import strip_punc
+from reddit_detective.utils import strip_quotes
 
 """
 Node types:
     Redditor
         Employee
-        Mod
-        Gold
+        Mod (Disabled temporarily since almost everyone shows up as a Mod)
+        Gold (Disabled temporarily since almost everyone shows up as Gold)
     Submission
         Archived
         Stickied
@@ -25,7 +25,7 @@ Relationship types:
     REPLIED (Redditor -> Redditor) (Use properties of CommentData)
     AUTHORED (Redditor -> Submission) (No properties)
     
-Textual properties are stripped from punctuation marks to 
+Textual properties are stripped from quotation marks to 
 better comply with how Cypher deals with strings,
 with a similar mindset with how Alexander solved the Gordian Knot.
 """
@@ -130,7 +130,7 @@ class Subreddit(Node):
             "created_utc": self.resp.created_utc,
             "name": str(self.resp.display_name),
             "over18": str(self.resp.over18),
-            "desc": str(strip_punc(self.resp.description)),
+            "desc": str(strip_quotes(self.resp.description)),
             # "subscribers": self.resp.subscribers,
             "submissions": {
                 "new": self.resp.new(limit=self.limit),
@@ -171,8 +171,8 @@ class Submission(Node):
         return {
             "id": self.resp.id,
             "created_utc": self.resp.created_utc,
-            "title": str(strip_punc(self.resp.title)),
-            "text": str(strip_punc(self.resp.selftext)),
+            "title": str(strip_quotes(self.resp.title)),
+            "text": str(strip_quotes(self.resp.selftext)),
             "archived": str(self.resp.archived),
             "stickied": str(self.resp.stickied),
             "locked": str(self.resp.locked),
@@ -205,6 +205,8 @@ class Submission(Node):
         return self.resp.author.id
 
     def comments(self):
+        if self.limit is not None:
+            return list(self.resp.comments[:self.limit])
         return list(self.resp.comments)
 
     def __str__(self):
@@ -286,7 +288,7 @@ class CommentData(Node):
         return {
             "id": self.resp.id,
             # "edited": str(self.resp.edited),
-            "text": strip_punc(self.resp.body),
+            "text": strip_quotes(self.resp.body),
             "is_submitter": str(self.resp.is_submitter),
             # "score": self.resp.score,
             "stickied": str(self.resp.stickied)
