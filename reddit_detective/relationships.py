@@ -20,7 +20,7 @@ MATCH (n1 {id: "%s"})
 MATCH (n2 {id: "%s"})
 WITH n1, n2
 MERGE ((n1)-[:%s %s]->(n2));
-    """ % (first_id, second_id, rel_type, props_str)
+""" % (first_id, second_id, rel_type, props_str)
 
 
 class Submissions:
@@ -38,52 +38,48 @@ class Submissions:
         self.start = starting_point
 
     def _link_subs_to_subreddit(self, additional_subs=None):
-        code_str = ""
+        codes = []
         props = {}
         subs = self.start.submissions()
         if additional_subs:
             subs += additional_subs
         for i in range(len(subs)):
-            code_str += _link_nodes(
+            codes.append(_link_nodes(
                 subs[i].data["id"],
                 subs[i].subreddit_id,
                 Relationships.under,
                 props
-            )
-        return code_str
+            ))
+        return codes
 
     def _link_subs_to_authors(self, additional_subs=None):
-        code_str = ""
+        codes = []
         props = {}
         subs = self.start.submissions()
         if additional_subs:
             subs += additional_subs
         for i in range(len(subs)):
-            code_str += _link_nodes(
+            codes.append(_link_nodes(
                 subs[i].author_id,
                 subs[i].data["id"],
                 Relationships.authored,
                 props
-            )
-        return code_str
+            ))
+        return codes
 
     def _merge_nodes(self):
         start = self.start
-        subreddits = set(Subreddit(start.api, sub.subreddit_name, limit=None).merge_code()
-                      for sub in start.submissions())
-        submissions = set(sub.merge_code() for sub in start.submissions())
-        authors = set(sub.author.merge_code() for sub in start.submissions())
-        code_str = ("\n".join(submissions)
-                    + "\n" + "\n".join(subreddits)
-                    + "\n" + "\n".join(authors) + ";")
-        return code_str
+        subreddits = list(set(Subreddit(start.api, sub.subreddit_name, limit=None).merge_code()
+                      for sub in start.submissions()))
+        submissions = list(set(sub.merge_code() for sub in start.submissions()))
+        authors = list(set(sub.author.merge_code() for sub in start.submissions()))
+        return subreddits + submissions + authors
 
     def code(self):
-        code_str = ""
-        code_str += self._merge_nodes()
-        code_str += self._link_subs_to_subreddit()
-        code_str += self._link_subs_to_authors()
-        return code_str
+        code = self._merge_nodes()
+        code += self._link_subs_to_subreddit()
+        code += self._link_subs_to_authors()
+        return code
 
 
 class Comments(Submissions):
@@ -116,44 +112,39 @@ class Comments(Submissions):
                 for comm in self.comments()]
 
     def _link_redditors_to_subs(self):
-        code_str = ""
+        codes = []
         comments = self.comments()
         comments_data = [CommentData(self.start.api, comm.id) for comm in comments]
         for i in range(len(comments)):
-            code_str += _link_nodes(
+            codes.append(_link_nodes(
                 comments[i].author.id,
                 comments[i].submission.id,
                 Relationships.commented,
                 props_str=comments_data[i].props_code()
-            )
-        return code_str
+            ))
+        return codes
 
     def _merge_nodes(self):
         start = self.start
         # Adding comments' submissions to start.submissions()
-        submissions = set(sub.merge_code() for sub in
-                       start.submissions() + self.comment_subs())
+        submissions = list(set(sub.merge_code() for sub in
+                       start.submissions() + self.comment_subs()))
         # Getting subreddits and their authors for every submission
-        subreddits = set(Subreddit(start.api, sub.subreddit_name, limit=None).merge_code()
-                      for sub in start.submissions() + self.comment_subs())
+        subreddits = list(set(Subreddit(start.api, sub.subreddit_name, limit=None).merge_code()
+                      for sub in start.submissions() + self.comment_subs()))
         authors = [sub.author.merge_code() for sub in start.submissions()]
         authors += [sub.author.merge_code() for sub in self.comment_subs()]
-        authors = set(authors)
+        authors = list(set(authors))
         # Adding commentor users
-        commentors = set(auth.merge_code() for auth in self.comment_authors())
-        code_str = ("\n".join(submissions)
-                    + "\n" + "\n".join(subreddits)
-                    + "\n" + "\n".join(authors)
-                    + "\n" + "\n".join(commentors) + ";")
-        return code_str
+        commentors = list(set(auth.merge_code() for auth in self.comment_authors()))
+        return subreddits + submissions + authors + commentors
 
     def code(self):
-        code_str = ""
-        code_str += self._merge_nodes()
-        code_str += self._link_subs_to_subreddit(additional_subs=self.comment_subs())
-        code_str += self._link_subs_to_authors(additional_subs=self.comment_subs())
-        code_str += self._link_redditors_to_subs()
-        return code_str
+        code = self._merge_nodes()
+        code += self._link_subs_to_subreddit(additional_subs=self.comment_subs())
+        code += self._link_subs_to_authors(additional_subs=self.comment_subs())
+        code += self._link_redditors_to_subs()
+        return code
 
 
 class CommentsReplies(Comments):
@@ -187,20 +178,20 @@ class CommentsReplies(Comments):
         return authors
 
     def _link_redditors_to_redditors(self):
-        code_str = ""
+        codes = []
         comments = self.comments()
         for i in range(len(comments)):
             replies = comments[i].replies
             for j in range(len(replies)):
-                code_str += _link_nodes(
+                codes.append(_link_nodes(
                     comments[i].author.id,
                     replies[j].author.id,
                     Relationships.replied,
                     CommentData(self.start.api, replies[j].id).props_code()
-                )
-        return code_str
+                ))
+        return codes
 
     def code(self):
-        code_str = super().code()
-        code_str += "\n" + self._link_redditors_to_redditors()
-        return code_str
+        code = super().code()
+        code += self._link_redditors_to_redditors()
+        return code

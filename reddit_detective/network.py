@@ -1,8 +1,8 @@
-import praw
-from neo4j import GraphDatabase
+from neo4j import BoltDriver
 from typing import List, Union
+from itertools import chain
 
-from reddit_detective.data_models import Redditor, Submission, Subreddit
+from reddit_detective.relationships import Submissions, Comments, CommentsReplies
 
 
 class RedditNetwork:
@@ -12,23 +12,31 @@ class RedditNetwork:
     """
     def __init__(
             self,
-            api: praw.Reddit,
-            driver: GraphDatabase,
-            starting_points: List[Union[Subreddit, Submission, Redditor]]
+            driver: BoltDriver,
+            components: List[Union[Submissions, Comments, CommentsReplies]]
     ):
-        self.api = api
         self.driver = driver
-        self.starting_points = starting_points
+        self.components = components
+
+    def _codes(self):
+        """
+        Get codes for every starting point
+        """
+        codes = list(chain.from_iterable([point.code() for point in self.components]))
+        # Remove duplicates without changing order
+        codes = sorted(set(codes), key=lambda x: codes.index(x))
+        return codes
 
     def cypher_code(self):
         """
-        Creates CypherQL code to be run in Neo4j
-        Use only this function if you want to just get the code but not run it
+        Use this function only if you want to just get the code but not run it
         """
-        pass
+        return "\n".join(self._codes())
 
     def run_cypher_code(self):
-        """
-        Runs the code created by self.cypher_code in your DB
-        """
-        pass
+        def run_code(tx):
+            for query in self._codes():
+                tx.run(query)
+            pass
+        with self.driver.session() as session:
+            session.write_transaction(run_code)

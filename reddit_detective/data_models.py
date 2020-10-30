@@ -103,7 +103,7 @@ class Node(ABC):
         """
         Denotes a node, to be used in defining relationships etc.
         """
-        return f"({self.types_code()} {self.props_code()})"
+        return f"({self.types_code()} {self.props_code()});"
 
     def merge_code(self):
         """
@@ -215,7 +215,7 @@ class Redditor(Node):
     # https://praw.readthedocs.io/en/latest/code_overview/models/redditor.html
     # Refer to https://praw.readthedocs.io/en/latest/code_overview/models/comment.html for comments
     main_type = "Redditor"
-    available_types = ["Employee", "Mod", "Gold"]
+    available_types = ["Employee"]  # Disabled Mod and Gold temporarily
     available_degrees = ["submissions", "comments", "replies"]
 
     def __init__(self, api, name, limit, indexing="hot", time_filter="all"):

@@ -1,7 +1,7 @@
 import praw
 
 from reddit_detective.data_models import Redditor, Subreddit
-from reddit_detective.relationships import Comments, Submissions
+from reddit_detective.relationships import Comments, CommentsReplies, Submissions
 from tests import api_
 
 """
@@ -37,9 +37,16 @@ def test_comments():
     assert comments_red.comment_subs()
     assert comments_red._merge_nodes()
     assert comments_red.code()
-    # print(comments_red.code())
+    print(comments_red.code())
+
+
+def test_replies():
+    sub = Subreddit(api_, "learnpython", limit=4, indexing="hot")
+    replies_sub = CommentsReplies(sub)
+    print(replies_sub.code())
 
 
 def run():
-    test_submissions()
-    test_comments()
+    # test_submissions()
+    # test_comments()
+    test_replies()
