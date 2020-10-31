@@ -28,6 +28,7 @@ def test_submission():
 
 def test_redditor():
     red = Redditor(api_, "Anub_Rekhan", limit=100)
+    red_susp = Redditor(api_, "deleted", limit=100)
     assert red.data["created_utc"]
     assert red.main_type in red.types
     assert red.properties["created_utc"]
@@ -35,6 +36,9 @@ def test_redditor():
     assert red.comments() is not None
     assert red.link_karma is not None
     assert red.comment_karma is not None
+    assert "Suspended" in red_susp.types
+    assert red_susp.comments() == []
+    assert red_susp.submissions() == []
 
 
 def test_commentdata():

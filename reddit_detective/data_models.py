@@ -8,8 +8,7 @@ from reddit_detective.utils import strip_punc
 Node types:
     Redditor
         Employee
-        Mod (Disabled temporarily since almost everyone shows up as a Mod)
-        Gold (Disabled temporarily since almost everyone shows up as Gold)
+        Suspended
     Submission
         Archived
         Stickied
@@ -225,7 +224,7 @@ class Redditor(Node):
     # https://praw.readthedocs.io/en/latest/code_overview/models/redditor.html
     # Refer to https://praw.readthedocs.io/en/latest/code_overview/models/comment.html for comments
     main_type = "Redditor"
-    available_types = ["Employee"]  # Disabled Mod and Gold temporarily
+    available_types = ["Employee", "Suspended"]
     available_degrees = ["submissions", "comments", "replies"]
 
     def __init__(self, api, name, limit, indexing="hot", time_filter="all"):
@@ -234,12 +233,22 @@ class Redditor(Node):
 
     @property
     def data(self):
+        try:
+            # Suspended/Shadowbanned/Non-existent accounts do not have created_utc property
+            _ = self.resp.created_utc
+        except AttributeError:
+            return {
+                "id": str(self.resp.name),
+                "suspended": "True",
+                "employee": "False"
+            }
         return {
             "id": self.resp.id,
             "username": str(self.resp.name),
             "created_utc": self.resp.created_utc,
             "has_verified_email": str(self.resp.has_verified_email),
             "employee": str(self.resp.is_employee),
+            "suspended": "False",
             "submissions": {
                 "new": self.resp.submissions.new(limit=self.limit),
                 "hot": self.resp.submissions.hot(limit=self.limit),
@@ -272,11 +281,15 @@ class Redditor(Node):
         searching submissions of a redditor, limit is set to None.
         (if not, they can fiddle with this at the Submission level)
         """
+        if self.data["suspended"] == "True":
+            return []
         subs = self.data["submissions"][self.indexing]
         ids = [sub.id for sub in subs]
         return [Submission(self.api, id_, limit=None) for id_ in ids]
 
     def comments(self):
+        if self.data["suspended"] == "True":
+            return []
         return list(self.data["comments"][self.indexing])
 
     def __str__(self):
