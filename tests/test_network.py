@@ -13,7 +13,7 @@ driver_ = GraphDatabase.driver(
 def test_network():
     net = RedditNetwork(
         driver=driver_,
-        starting_points=[
+        components=[
             Submissions(Redditor(api_, "yigitaga32", limit=2)),
             Comments(Redditor(api_, "Anub_Rekhan", limit=2))
         ]
