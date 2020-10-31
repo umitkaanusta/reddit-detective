@@ -61,3 +61,7 @@ def run():
     test_submission()
     test_redditor()
     test_cypher_codes_node()
+
+
+if __name__ == '__main__':
+    run()

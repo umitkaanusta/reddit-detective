@@ -10,21 +10,16 @@ driver_ = GraphDatabase.driver(
 )
 
 
-def test_network():
+def test_constraint_creation():
     net = RedditNetwork(
         driver=driver_,
-        components=[
-            Comments(Redditor(api_, "BloodMooseSquirrel", limit=5)),
-            Comments(Redditor(api_, "Anub_Rekhan", limit=5))
-        ]
+        components=[]
     )
-    assert net
-    assert net.cypher_code()
-    net.run_cypher_code()
+    net.create_constraints()
 
 
 def run():
-    test_network()
+    test_constraint_creation()
 
 
 if __name__ == '__main__':

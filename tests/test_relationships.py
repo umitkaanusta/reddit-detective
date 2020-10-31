@@ -5,15 +5,15 @@ from reddit_detective.relationships import Comments, CommentsReplies, Submission
 from tests import api_
 
 """
-    Constraint codes to be run when testing in Neo4j:
+    Constraint codes to be run when manually testing in Neo4j:
     
-    CREATE CONSTRAINT ExistsRedditor
+    CREATE CONSTRAINT UniqueRedditor
     ON (r:Redditor) ASSERT (r.id) IS UNIQUE
     
-    CREATE CONSTRAINT ExistsSubmission
+    CREATE CONSTRAINT UniqueSubmission
     ON (sm:Submission) ASSERT (sm.id) IS UNIQUE
     
-    CREATE CONSTRAINT ExistsSubreddit
+    CREATE CONSTRAINT UniqueSubreddit
     ON (sr:Subreddit) ASSERT (sr.id) IS UNIQUE
 """
 
@@ -46,6 +46,10 @@ def test_replies():
 
 
 def run():
-    # test_submissions()
+    test_submissions()
     test_comments()
-    # test_replies()
+    test_replies()
+
+
+if __name__ == '__main__':
+    run()

@@ -5,6 +5,19 @@ from itertools import chain
 from reddit_detective.relationships import Submissions, Comments, CommentsReplies
 
 
+# Do not alter
+_CONSTRAINTS = [
+    """CREATE CONSTRAINT UniqueRedditor
+        ON (r:Redditor) ASSERT (r.id) IS UNIQUE;""",
+    
+    """CREATE CONSTRAINT UniqueSubmission
+        ON (sm:Submission) ASSERT (sm.id) IS UNIQUE;""",
+    
+    """CREATE CONSTRAINT UniqueSubreddit
+        ON (sr:Subreddit) ASSERT (sr.id) IS UNIQUE;"""
+]
+
+
 class RedditNetwork:
     """
     This will be the outcome of conversion of Reddit data to a social network
@@ -17,6 +30,21 @@ class RedditNetwork:
     ):
         self.driver = driver
         self.components = components
+
+    def _run_query(self, codes):
+        def run_code(tx):
+            for query in codes:
+                tx.run(query)
+        with self.driver.session() as session:
+            session.write_transaction(run_code)
+
+    def create_constraints(self):
+        """
+        Creates the needed constraints for the Network (optional but highly recommended)
+        Make sure that the given constraints DON'T exist in your DB before calling the method.
+        Otherwise Neo4j gives an error
+        """
+        self._run_query(codes=_CONSTRAINTS)
 
     def _codes(self):
         """
@@ -34,9 +62,4 @@ class RedditNetwork:
         return "\n".join(self._codes())
 
     def run_cypher_code(self):
-        def run_code(tx):
-            for query in self._codes():
-                tx.run(query)
-            pass
-        with self.driver.session() as session:
-            session.write_transaction(run_code)
+        self._run_query(codes=self._codes())
