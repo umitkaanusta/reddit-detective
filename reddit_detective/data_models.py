@@ -2,7 +2,7 @@ import praw
 from prawcore.exceptions import Redirect
 from abc import ABC
 
-from reddit_detective.utils import strip_quotes
+from reddit_detective.utils import strip_punc
 
 """
 Node types:
@@ -25,8 +25,8 @@ Relationship types:
     REPLIED (Redditor -> Redditor) (Use properties of CommentData)
     AUTHORED (Redditor -> Submission) (No properties)
     
-Textual properties are stripped from quotation marks to 
-better comply with how Cypher deals with strings,
+Textual properties are stripped from some certain punctuation marks 
+to better comply with how Cypher deals with strings,
 with a similar mindset with how Alexander solved the Gordian Knot.
 """
 
@@ -130,7 +130,7 @@ class Subreddit(Node):
             "created_utc": self.resp.created_utc,
             "name": str(self.resp.display_name),
             "over18": str(self.resp.over18),
-            "desc": str(strip_quotes(self.resp.description)),
+            "desc": str(strip_punc(self.resp.description)),
             # "subscribers": self.resp.subscribers,
             "submissions": {
                 "new": self.resp.new(limit=self.limit),
@@ -171,8 +171,8 @@ class Submission(Node):
         return {
             "id": self.resp.id,
             "created_utc": self.resp.created_utc,
-            "title": str(strip_quotes(self.resp.title)),
-            "text": str(strip_quotes(self.resp.selftext)),
+            "title": str(strip_punc(self.resp.title)),
+            "text": str(strip_punc(self.resp.selftext)),
             "archived": str(self.resp.archived),
             "stickied": str(self.resp.stickied),
             "locked": str(self.resp.locked),
@@ -288,7 +288,7 @@ class CommentData(Node):
         return {
             "id": self.resp.id,
             # "edited": str(self.resp.edited),
-            "text": strip_quotes(self.resp.body),
+            "text": strip_punc(self.resp.body),
             "is_submitter": str(self.resp.is_submitter),
             # "score": self.resp.score,
             "stickied": str(self.resp.stickied)
