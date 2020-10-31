@@ -131,7 +131,6 @@ class Subreddit(Node):
             "name": str(self.resp.display_name),
             "over18": str(self.resp.over18),
             "desc": str(strip_punc(self.resp.description)),
-            # "subscribers": self.resp.subscribers,
             "submissions": {
                 "new": self.resp.new(limit=self.limit),
                 "hot": self.resp.hot(limit=self.limit),
@@ -139,6 +138,10 @@ class Subreddit(Node):
                 "top": self.resp.top(time_filter=self.time_filter, limit=self.limit)
             }
         }
+
+    @property
+    def subscribers(self):
+        return self.resp.subscribers
 
     def submissions(self):
         """
@@ -177,10 +180,15 @@ class Submission(Node):
             "stickied": str(self.resp.stickied),
             "locked": str(self.resp.locked),
             "over18": str(self.resp.over_18),
-            # "score": self.resp.score,
-            # "upvote_ratio": self.resp.upvote_ratio,
-            # "edited": str(self.resp.edited),
         }
+
+    @property
+    def score(self):
+        return self.resp.score
+
+    @property
+    def upvote_ratio(self):
+        return self.resp.upvote_ratio
 
     @property
     def author(self):
@@ -231,11 +239,7 @@ class Redditor(Node):
             "username": str(self.resp.name),
             "created_utc": self.resp.created_utc,
             "has_verified_email": str(self.resp.has_verified_email),
-            # "comment_karma": self.resp.comment_karma,
-            # "link_karma": self.resp.link_karma,
             "employee": str(self.resp.is_employee),
-            # "mod": str(self.resp.is_mod),
-            # "gold": str(self.resp.is_gold),
             "submissions": {
                 "new": self.resp.submissions.new(limit=self.limit),
                 "hot": self.resp.submissions.hot(limit=self.limit),
@@ -251,6 +255,14 @@ class Redditor(Node):
                 "top": self.resp.comments.top(time_filter=self.time_filter, limit=self.limit)
             }
         }
+
+    @property
+    def comment_karma(self):
+        return self.resp.comment_karma
+
+    @property
+    def link_karma(self):
+        return self.resp.link_karma
 
     def submissions(self):
         """
@@ -287,12 +299,15 @@ class CommentData(Node):
     def properties(self):
         return {
             "id": self.resp.id,
-            # "edited": str(self.resp.edited),
             "text": strip_punc(self.resp.body),
             "is_submitter": str(self.resp.is_submitter),
             # "score": self.resp.score,
             "stickied": str(self.resp.stickied)
         }
+
+    @property
+    def score(self):
+        return self.resp.score
 
     def replies(self):
         return list(self.resp.replies)

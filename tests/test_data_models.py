@@ -12,6 +12,7 @@ def test_subreddit():
     assert sub.main_type in sub.types
     assert sub.properties["created_utc"]
     assert sub.submissions() is not None
+    assert sub.subscribers is not None  # it might be zero, 0 gives AssertionError
 
 
 def test_submission():
@@ -21,6 +22,8 @@ def test_submission():
     assert sub.properties["created_utc"]
     assert sub.comments() is not None
     assert isinstance(sub.author, Redditor)
+    assert sub.score is not None
+    assert sub.upvote_ratio is not None
 
 
 def test_redditor():
@@ -30,6 +33,8 @@ def test_redditor():
     assert red.properties["created_utc"]
     assert red.submissions() is not None
     assert red.comments() is not None
+    assert red.link_karma is not None
+    assert red.comment_karma is not None
 
 
 def test_commentdata():
@@ -39,6 +44,7 @@ def test_commentdata():
     assert isinstance(cd.submission, Submission)
     assert isinstance(cd.subreddit, Subreddit)
     assert cd.replies() is not None
+    assert cd.score is not None
 
 
 def test_cypher_codes_node():
