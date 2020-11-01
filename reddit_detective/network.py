@@ -1,8 +1,11 @@
+import praw
 from neo4j import BoltDriver
 from typing import List, Union
 from itertools import chain
 
 from reddit_detective.relationships import Submissions, Comments, CommentsReplies
+from reddit_detective.karma import (_remove_karma, _set_karma_subreddits, _set_karma_submissions,
+                                    _set_karma_redditors, _set_karma_comments)
 
 
 # Do not alter
@@ -37,6 +40,30 @@ class RedditNetwork:
                 tx.run(query)
         with self.driver.session() as session:
             session.write_transaction(run_code)
+
+    def _ids(self):
+        """
+        Get id of each node and relationship
+        """
+        d = self.driver
+        s = d.session()
+        subreddits_result = s.run("MATCH (n:Subreddit) RETURN n.name AS name")
+        submissions_result = s.run("MATCH (n:Submission) RETURN n.id AS id")
+        redditors_result = s.run("MATCH (n:Redditor) RETURN n.username AS name")
+        rels_result = s.run("MATCH()-[r:COMMENTED|REPLIED]-() RETURN r.id AS id")
+        return [subreddits_result, submissions_result, redditors_result, rels_result]
+
+    def add_karma(self, api: praw.Reddit):
+        self.remove_karma()  # Clear karma at the beginning to comply with Constraints
+        ids = self._ids()
+        codes = _set_karma_subreddits(api, ids[0])
+        codes += _set_karma_submissions(api, ids[1])
+        codes += _set_karma_redditors(api, ids[2])
+        codes += _set_karma_comments(api, ids[3])
+        self._run_query(codes)
+
+    def remove_karma(self):
+        self._run_query(_remove_karma())
 
     def create_constraints(self):
         """

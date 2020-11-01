@@ -314,7 +314,6 @@ class CommentData(Node):
             "id": self.resp.id,
             "text": strip_punc(self.resp.body),
             "is_submitter": str(self.resp.is_submitter),
-            # "score": self.resp.score,
             "stickied": str(self.resp.stickied)
         }
 
