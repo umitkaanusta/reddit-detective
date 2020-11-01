@@ -1,7 +1,8 @@
 from neo4j import GraphDatabase
 
 from tests import api_
-from reddit_detective import RedditNetwork
+from reddit_detective import RedditNetwork, Submissions, Comments, CommentsReplies
+from reddit_detective.data_models import Redditor, Subreddit, Submission
 
 driver_ = GraphDatabase.driver(
     "bolt://localhost:7687",
@@ -9,16 +10,16 @@ driver_ = GraphDatabase.driver(
 )
 
 
-def test_constraint_creation():
+def test_karma():
     net = RedditNetwork(
         driver=driver_,
         components=[]
     )
-    net.create_constraints()
+    net.add_karma(api_)
 
 
 def run():
-    test_constraint_creation()
+    test_karma()
 
 
 if __name__ == '__main__':
