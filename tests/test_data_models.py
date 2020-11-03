@@ -1,4 +1,4 @@
-from reddit_detective.data_models import CommentData, Submission, Subreddit, Redditor
+from reddit_detective.data_models import Comment, Submission, Subreddit, Redditor
 from tests import api_
 
 """
@@ -41,12 +41,11 @@ def test_redditor():
     assert red_susp.submissions() == []
 
 
-def test_commentdata():
-    cd = CommentData(api_, "ga5umu3")
+def test_comment():
+    cd = Comment(api_, "ga5umu3")
     assert cd.properties["text"]
     assert isinstance(cd.author, Redditor)
     assert isinstance(cd.submission, Submission)
-    assert isinstance(cd.subreddit, Subreddit)
     assert cd.replies() is not None
     assert cd.score is not None
 
@@ -70,6 +69,7 @@ def run():
     test_subreddit()
     test_submission()
     test_redditor()
+    test_comment()
     test_cypher_codes_node()
 
 
