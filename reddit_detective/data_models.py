@@ -221,7 +221,6 @@ class Submission(Node):
 
 class Redditor(Node):
     # https://praw.readthedocs.io/en/latest/code_overview/models/redditor.html
-    # Refer to https://praw.readthedocs.io/en/latest/code_overview/models/comment.html for comments
     main_type = "Redditor"
     available_types = ["Employee", "Suspended"]
     available_degrees = ["submissions", "comments", "replies"]
@@ -296,6 +295,7 @@ class Redditor(Node):
 
 
 class Comment(Node):
+    # https://praw.readthedocs.io/en/latest/code_overview/models/comment.html
     main_type = "Comment"
     available_types = []
 
@@ -308,6 +308,7 @@ class Comment(Node):
     def properties(self):
         return {
             "id": self.resp.id,
+            "created_utc": self.resp.created_utc,
             "text": strip_punc(self.resp.body),
             "is_submitter": str(self.resp.is_submitter),
             "stickied": str(self.resp.stickied)
