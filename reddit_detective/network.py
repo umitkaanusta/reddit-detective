@@ -50,8 +50,8 @@ class RedditNetwork:
         subreddits_result = s.run("MATCH (n:Subreddit) RETURN n.name AS name")
         submissions_result = s.run("MATCH (n:Submission) RETURN n.id AS id")
         redditors_result = s.run("MATCH (n:Redditor) RETURN n.username AS name")
-        rels_result = s.run("MATCH()-[r:COMMENTED|REPLIED]-() RETURN r.id AS id")
-        return [subreddits_result, submissions_result, redditors_result, rels_result]
+        comms_result = s.run("MATCH (c:Comment) RETURN c.id AS id")
+        return [subreddits_result, submissions_result, redditors_result, comms_result]
 
     def add_karma(self, api: praw.Reddit):
         self.remove_karma()  # Clear karma at the beginning to comply with Constraints
