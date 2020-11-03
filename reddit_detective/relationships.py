@@ -2,7 +2,7 @@ from typing import Union
 from itertools import chain
 
 from reddit_detective.data_models import Relationships
-from reddit_detective.data_models import CommentData, Submission, Subreddit, Redditor
+from reddit_detective.data_models import Comment, Submission, Subreddit, Redditor
 
 
 def _link_nodes(first_id, second_id, rel_type, props_str):
@@ -114,7 +114,7 @@ class Comments(Submissions):
     def _link_redditors_to_subs(self):
         codes = []
         comments = self.comments()
-        comments_data = [CommentData(self.start.api, comm.id) for comm in comments]
+        comments_data = [Comment(self.start.api, comm.id) for comm in comments]
         for i in range(len(comments)):
             codes.append(_link_nodes(
                 comments[i].author.id,
@@ -187,7 +187,7 @@ class CommentsReplies(Comments):
                     comments[i].author.id,
                     replies[j].author.id,
                     Relationships.replied,
-                    CommentData(self.start.api, replies[j].id).props_code()
+                    Comment(self.start.api, replies[j].id).props_code()
                 ))
         return codes
 

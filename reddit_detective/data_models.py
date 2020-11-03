@@ -16,13 +16,12 @@ Node types:
         Over18
     Subreddit
         Over18
+    Comment
         
 Relationship types:
     MODERATES (Redditor -> Subreddit) (No properties)
-    UNDER (Submission -> Subreddit) (No properties)
-    COMMENTED (Redditor -> Submission) (Use properties of CommentData)
-    REPLIED (Redditor -> Redditor) (Use properties of CommentData)
-    AUTHORED (Redditor -> Submission) (No properties)
+    UNDER (Submission -> Subreddit) OR (Comment -> Comment) (No properties)
+    AUTHORED (Redditor -> Submission) OR (Redditor -> Comment) (No properties)
     
 Textual properties are stripped from some certain punctuation marks 
 to better comply with how Cypher deals with strings,
@@ -296,13 +295,10 @@ class Redditor(Node):
         return f"Redditor({self.name})"
 
 
-class CommentData(Node):
-    """
-    Holds code generation methods and data of comments
-    NOT A NODE, just a helper class to hold comment data
+class Comment(Node):
+    main_type = "Comment"
+    available_types = []
 
-    Then why inherits from Node? Just for Cypher code generation methods
-    """
     def __init__(self, api: praw.Reddit, id_):
         self.api = api
         self.id = id_
@@ -318,6 +314,24 @@ class CommentData(Node):
         }
 
     @property
+    def author(self):
+        username = self.resp.author.name
+        return Redditor(self.api, username, limit=None)
+
+    @property
+    def author_id(self):
+        return self.resp.author.id
+
+    @property
+    def submission(self):
+        sub = self.resp.submission.id
+        return Submission(self.api, sub, limit=None)
+
+    @property
+    def submission_id(self):
+        return self.resp.submission.id
+
+    @property
     def score(self):
         return self.resp.score
 
@@ -328,6 +342,4 @@ class CommentData(Node):
 class Relationships:
     moderates = "MODERATES"
     under = "UNDER"
-    commented = "COMMENTED"
     authored = "AUTHORED"
-    replied = "REPLIED"
