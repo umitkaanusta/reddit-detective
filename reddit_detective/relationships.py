@@ -111,16 +111,29 @@ class Comments(Submissions):
         return [Redditor(self.start.api, comm.author.name, limit=None)
                 for comm in self.comments()]
 
-    def _link_redditors_to_subs(self):
+    def _link_comments_to_subs(self):
         codes = []
+        props = {}
         comments = self.comments()
-        comments_data = [Comment(self.start.api, comm.id) for comm in comments]
+        for i in range(len(comments)):
+            codes.append(_link_nodes(
+                comments[i].id,
+                comments[i].submission.id,
+                Relationships.under,
+                props
+            ))
+        return codes
+
+    def _link_authors_to_comms(self):
+        codes = []
+        props = {}
+        comments = self.comments()
         for i in range(len(comments)):
             codes.append(_link_nodes(
                 comments[i].author.id,
-                comments[i].submission.id,
-                Relationships.commented,
-                props_str=comments_data[i].props_code()
+                comments[i].id,
+                Relationships.authored,
+                props
             ))
         return codes
 
@@ -132,18 +145,21 @@ class Comments(Submissions):
         # Getting subreddits and their authors for every submission
         subreddits = list(set(Subreddit(start.api, sub.subreddit_name, limit=None).merge_code()
                       for sub in start.submissions() + self.comment_subs()))
+        comments = list(set(Comment(start.api, comm.id).merge_code()
+                            for comm in self.comments()))
         authors = [sub.author.merge_code() for sub in start.submissions()]
         authors += [sub.author.merge_code() for sub in self.comment_subs()]
         authors = list(set(authors))
         # Adding commentor users
         commentors = list(set(auth.merge_code() for auth in self.comment_authors()))
-        return subreddits + submissions + authors + commentors
+        return subreddits + submissions + authors + commentors + comments
 
     def code(self):
         code = self._merge_nodes()
         code += self._link_subs_to_subreddit(additional_subs=self.comment_subs())
         code += self._link_subs_to_authors(additional_subs=self.comment_subs())
-        code += self._link_redditors_to_subs()
+        code += self._link_comments_to_subs()
+        code += self._link_authors_to_comms()
         return code
 
 
@@ -164,34 +180,22 @@ class CommentsReplies(Comments):
                             "Subreddit, Submission or Redditor")
         self.start = starting_point
 
-    def reply_authors(self):
-        """
-        Get list of replying users for each comment
-        """
-        authors = []
-        replies = [comm.replies() for comm in self.comments()]
-        for reply_list in replies:
-            for i in range(len(reply_list)):
-                reply = reply_list[i]
-                reply_list[i] = Redditor(self.start.api, reply.author.id, limit=None)
-            authors.append(reply_list)
-        return authors
-
-    def _link_redditors_to_redditors(self):
+    def _link_replies_to_comms(self):
         codes = []
+        props = {}
         comments = self.comments()
         for i in range(len(comments)):
             replies = comments[i].replies
             for j in range(len(replies)):
                 codes.append(_link_nodes(
-                    comments[i].author.id,
-                    replies[j].author.id,
-                    Relationships.replied,
-                    Comment(self.start.api, replies[j].id).props_code()
+                    comments[i].id,
+                    replies[j].id,
+                    Relationships.under,
+                    props
                 ))
         return codes
 
     def code(self):
         code = super().code()
-        code += self._link_redditors_to_redditors()
+        code += self._link_replies_to_comms()
         return code
