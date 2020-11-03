@@ -58,7 +58,7 @@ SET n.comment_karma = %s, n.link_karma = %s
 def _set_comment_score(api: praw.Reddit, id_):
     comm = api.comment(id_)
     return """
-MATCH ()-[n:Comment {id: "%s"}]-()
+MATCH (n:Comment {id: "%s"})
 WITH n
 SET n.score = %s;
 """ % (comm.id, comm.score)
