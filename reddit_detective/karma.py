@@ -64,35 +64,31 @@ SET n.score = %s;
 """ % (comm.id, comm.score)
 
 
-def _remove_stuff_subreddit():
-    return """
+remove_stuff_subreddit = """
 MATCH (n:Subreddit)
 WITH n
 REMOVE n.subscribers;
 """
 
 
-def _remove_stuff_submission():
-    return """
+remove_stuff_submission = """
 MATCH (n:Submission)
 WITH n
 REMOVE n.score, n.upvote_ratio;
 """
 
 
-def _remove_stuff_redditor():
-    return """
+remove_stuff_redditor = """
 MATCH (n:Redditor)
 WITH n
 REMOVE n.comment_karma, n.link_karma;
 """
 
 
-def _remove_stuff_comment():
-    return """
-MATCH ()-[r:COMMENTED|REPLIED]-()
-WITH r
-REMOVE r.score;
+remove_stuff_comment = """
+MATCH ()-[n:Comment]-()
+WITH n
+REMOVE n.score;
 """
 
 
@@ -114,8 +110,8 @@ def _set_karma_comments(api, ids):
 
 def _remove_karma():
     return [
-        _remove_stuff_subreddit(),
-        _remove_stuff_submission(),
-        _remove_stuff_redditor(),
-        _remove_stuff_comment()
+        remove_stuff_subreddit,
+        remove_stuff_submission,
+        remove_stuff_redditor,
+        remove_stuff_comment
     ]
