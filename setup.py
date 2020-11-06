@@ -1,17 +1,21 @@
 from distutils.core import setup
 
+from reddit_detective import VERSION
+
 setup(
     name='reddit-detective',
     packages=['reddit_detective'],
-    version='0.1.0',
+    version=VERSION,
     license='MIT',
     description='Play detective on Reddit',
     author='Ümit Kaan Usta',
     author_email='u.kaanusta@gmail.com',
     url='https://github.com/umitkaanusta/reddit-detective',
-    download_url='https://github.com/umitkaanusta/reddit-detective/archive/v0.1.0.tar.gz',
+    download_url=f'https://github.com/umitkaanusta/reddit-detective/archive/v{VERSION}.tar.gz',
     keywords=["reddit", "data", "analysis", "analytics", "social",
-              "network", "graph", "neo4j", "media", "news", "politics"],
+              "network", "graph", "neo4j", "media", "news", "politics",
+              "campaign", "information", "troll", "comment", "influencer",
+              "idea", "spread", "campaign", "elections"],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
