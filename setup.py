@@ -4,7 +4,7 @@ from reddit_detective import VERSION
 
 setup(
     name='reddit-detective',
-    packages=['reddit_detective'],
+    packages=['reddit_detective', 'reddit_detective.analytics'],
     version=VERSION,
     license='MIT',
     description='Play detective on Reddit',
