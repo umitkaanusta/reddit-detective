@@ -7,7 +7,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="reddit_detective",
-    packages=["reddit_detective"],
+    packages=["reddit_detective", "reddit_detective.analytics"],
+    license="MIT",
     version=VERSION,
     author="Ümit Kaan Usta",
     author_email="u.kaanusta@gmail.com",
@@ -35,5 +36,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    python_requires=">=3.6"
+    python_requires=">=3.6",
+    install_requires=["praw", "neo4j"]
 )
