@@ -1,8 +1,8 @@
 from neo4j import GraphDatabase
 
 from tests import api_
-from reddit_detective import RedditNetwork, Submissions, Comments, CommentsReplies
-from reddit_detective.data_models import Redditor, Subreddit, Submission
+from reddit_detective import RedditNetwork, Comments
+from reddit_detective.data_models import Redditor
 
 driver_ = GraphDatabase.driver(
     "bolt://localhost:7687",

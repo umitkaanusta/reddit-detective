@@ -1,5 +1,3 @@
-import praw
-
 from reddit_detective.data_models import Redditor, Subreddit
 from reddit_detective.relationships import Comments, CommentsReplies, Submissions
 from tests import api_

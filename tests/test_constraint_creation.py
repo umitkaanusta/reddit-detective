@@ -1,6 +1,5 @@
 from neo4j import GraphDatabase
 
-from tests import api_
 from reddit_detective import RedditNetwork
 
 driver_ = GraphDatabase.driver(
