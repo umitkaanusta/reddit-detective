@@ -21,8 +21,6 @@ def test_submissions():
     submissions_red = Submissions(red)
     sub = Subreddit(api_, "learnpython", limit=2)
     submissions_sub = Submissions(sub)
-    # print(submissions_red.code())
-    # print(submissions_sub.code())
     assert submissions_red.code()
     assert submissions_sub.code()
 
@@ -34,7 +32,6 @@ def test_comments():
     assert comments_red.comment_authors()
     assert comments_red.comment_subs()
     assert comments_red.code()
-    print(comments_red.code())
 
 
 def test_replies():

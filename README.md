@@ -5,7 +5,7 @@
 ![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)
 
 ```
-pip install reddit-detective
+pip install reddit_detective
 ```
 
 **reddit-detective** represents reddit in a graph structure using Neo4j. 
@@ -27,7 +27,7 @@ how Redditors behave.
 - Neo4j uses Cypher language as its query language. 
 Knowing Cypher dramatically increases what you can do with reddit-detective 
 [Click here to learn Cypher](https://neo4j.com/graphacademy/online-training/introduction-to-neo4j-40/)
-- Install reddit-detective with `pip install reddit-detective`
+- Install reddit-detective with `pip install reddit_detective`
 
 
 ## Code Samples

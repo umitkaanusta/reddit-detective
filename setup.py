@@ -6,7 +6,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="reddit-detective",
+    name="reddit_detective",
+    packages=["reddit_detective"],
     version=VERSION,
     author="Ümit Kaan Usta",
     author_email="u.kaanusta@gmail.com",
@@ -14,7 +15,6 @@ setuptools.setup(
     description="Play detective on Reddit",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
     keywords=["reddit", "data", "analysis", "analytics", "social",
               "network", "graph", "neo4j", "media", "news", "politics",
               "campaign", "information", "troll", "comment", "influencer",
