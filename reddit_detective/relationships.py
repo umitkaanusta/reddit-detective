@@ -140,7 +140,7 @@ class Comments(Submissions):
 
             submissions.append(Submission(self.start.api, comment.submission.id, limit=None))
         
-        return comment_codes + authors, parent_links + author_links, submissions
+        return comment_codes + authors, parent_links + author_links, list(set(submissions))
     
     def code(self):
         comment_merges, comment_links, submissions = self._merge_and_link_comments(self.comments())
