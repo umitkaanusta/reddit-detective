@@ -1,5 +1,5 @@
 import praw
-from prawcore.exceptions import Redirect
+from prawcore.exceptions import Redirect, NotFound
 from abc import ABC
 
 from reddit_detective.utils import strip_punc
@@ -157,7 +157,30 @@ class Subreddit(Node):
         return f"Subreddit({self.name})"
 
 
-class Submission(Node):
+class SubOrComment(Node):
+    @property
+    def author(self):
+        try:
+            # Suspended/Shadowbanned/Non-existent accounts do not have created_utc property
+            username = self.resp.author.name
+        except AttributeError:
+            username = "[deleted]"
+        return Redditor(self.api, username, limit=None)
+
+    @property
+    def author_id(self):
+        try:
+            # Suspended/Shadowbanned/Non-existent accounts do not have created_utc property
+            return self.resp.author.id
+        except AttributeError:
+            return "[deleted]"
+    
+    @property
+    def score(self):
+        return self.resp.score
+
+
+class Submission(SubOrComment):
     # https://praw.readthedocs.io/en/latest/code_overview/models/submission.html
     main_type = "Submission"
     available_types = ["Archived", "Stickied", "Locked", "Over18"]
@@ -181,17 +204,8 @@ class Submission(Node):
         }
 
     @property
-    def score(self):
-        return self.resp.score
-
-    @property
     def upvote_ratio(self):
         return self.resp.upvote_ratio
-
-    @property
-    def author(self):
-        username = self.resp.author.name
-        return Redditor(self.api, username, limit=None)
 
     @property
     def subreddit(self):
@@ -205,10 +219,6 @@ class Submission(Node):
     @property
     def subreddit_name(self):
         return self.resp.subreddit.display_name
-
-    @property
-    def author_id(self):
-        return self.resp.author.id
 
     def comments(self):
         if self.limit is not None:
@@ -237,6 +247,14 @@ class Redditor(Node):
         except AttributeError:
             return {
                 "id": str(self.resp.name),
+                "username": str(self.resp.name),
+                "suspended": "True",
+                "employee": "False"
+            }
+        except NotFound:
+            return {
+                "id": "[deleted]",
+                "username": "[deleted]",
                 "suspended": "True",
                 "employee": "False"
             }
@@ -294,7 +312,7 @@ class Redditor(Node):
         return f"Redditor({self.name})"
 
 
-class Comment(Node):
+class Comment(SubOrComment):
     # https://praw.readthedocs.io/en/latest/code_overview/models/comment.html
     main_type = "Comment"
     available_types = []
@@ -315,15 +333,6 @@ class Comment(Node):
         }
 
     @property
-    def author(self):
-        username = self.resp.author.name
-        return Redditor(self.api, username, limit=None)
-
-    @property
-    def author_id(self):
-        return self.resp.author.id
-
-    @property
     def submission(self):
         sub = self.resp.submission.id
         return Submission(self.api, sub, limit=None)
@@ -331,10 +340,6 @@ class Comment(Node):
     @property
     def submission_id(self):
         return self.resp.submission.id
-
-    @property
-    def score(self):
-        return self.resp.score
 
     def replies(self):
         return list(self.resp.replies)
