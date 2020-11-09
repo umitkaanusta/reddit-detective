@@ -58,21 +58,22 @@ class Submissions:
             if subreddit_code not in subreddits:
                 subreddits.append(subreddit_code)
             
-            author_code = sub.author.merge_code()
-            if author_code not in authors:
-                authors.append(author_code)
-            
+            if sub.author_accessible:
+                author_code = sub.author.merge_code()
+                if author_code not in authors:
+                    authors.append(author_code)
+                
+                author_links.append(_link_nodes(
+                    sub.author_id,
+                    sub.data["id"],
+                    Relationships.authored,
+                    props
+                ))
+
             subreddit_links.append(_link_nodes(
                 sub.data["id"],
                 sub.subreddit_id,
                 Relationships.under,
-                props
-            ))
-
-            author_links.append(_link_nodes(
-                sub.author_id,
-                sub.data["id"],
-                Relationships.authored,
                 props
             ))
         
@@ -120,21 +121,22 @@ class Comments(Submissions):
             comment_instance = Comment(self.start.api, comment.id)
             comment_codes.append(comment_instance.merge_code())
 
-            author_code = comment_instance.author.merge_code()
-            if author_code not in authors:
-                authors.append(author_code)
+            if comment_instance.author_accessible:
+                author_code = comment_instance.author.merge_code()
+                if author_code not in authors:
+                    authors.append(author_code)
+                
+                author_links.append(_link_nodes(
+                    comment_instance.author_id,
+                    comment.id,
+                    Relationships.authored,
+                    props
+                ))
             
             parent_links.append(_link_nodes(
                 comment.id,
                 comment.parent_id[3:],
                 Relationships.under,
-                props
-            ))
-
-            author_links.append(_link_nodes(
-                comment_instance.author_id,
-                comment.id,
-                Relationships.authored,
                 props
             ))
 

@@ -159,21 +159,20 @@ class Subreddit(Node):
 
 class SubOrComment(Node):
     @property
+    def author_accessible(self):
+        return self.resp.author is not None
+    
+    @property
     def author(self):
-        try:
-            # Suspended/Shadowbanned/Non-existent accounts do not have created_utc property
-            username = self.resp.author.name
-        except AttributeError:
-            username = "[deleted]"
+        username = self.resp.author.name
         return Redditor(self.api, username, limit=None)
 
     @property
     def author_id(self):
         try:
-            # Suspended/Shadowbanned/Non-existent accounts do not have created_utc property
             return self.resp.author.id
         except AttributeError:
-            return "[deleted]"
+            return self.resp.author.name
     
     @property
     def score(self):
@@ -248,13 +247,6 @@ class Redditor(Node):
             return {
                 "id": str(self.resp.name),
                 "username": str(self.resp.name),
-                "suspended": "True",
-                "employee": "False"
-            }
-        except NotFound:
-            return {
-                "id": "[deleted]",
-                "username": "[deleted]",
                 "suspended": "True",
                 "employee": "False"
             }
