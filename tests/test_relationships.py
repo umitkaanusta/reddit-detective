@@ -29,14 +29,13 @@ def test_comments():
     red = Redditor(api_, "Anub_Rekhan", limit=2, indexing="new")
     comments_red = Comments(red)
     assert comments_red.comments()
-    assert comments_red.comment_authors()
-    assert comments_red.comment_subs()
     assert comments_red.code()
 
 
 def test_replies():
     sub = Subreddit(api_, "learnpython", limit=2, indexing="hot")
     replies_sub = CommentsReplies(sub)
+    assert replies_sub.comments()
     assert replies_sub.code()
 
 
