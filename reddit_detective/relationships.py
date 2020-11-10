@@ -4,7 +4,6 @@ from itertools import chain
 from reddit_detective.data_models import Relationships
 from reddit_detective.data_models import Comment, Submission, Subreddit, Redditor
 
-
 def _link_nodes(first_id, second_id, rel_type, props_str):
     """
     Using ids of two nodes and rel type, create code for linking nodes
@@ -22,6 +21,13 @@ WITH n1, n2
 MERGE ((n1)-[:%s %s]->(n2));
 """ % (first_id, second_id, rel_type, props_str)
 
+def _search_submission(comment, api):
+    comment_list = [comment]
+    _comment = comment
+    while _comment.parent_id[3:] != _comment.submission.id:
+        _comment = api.comment(_comment.parent_id[3:])
+        comment_list.append(_comment)
+    return comment_list
 
 class Submissions:
     """
@@ -37,50 +43,45 @@ class Submissions:
             raise TypeError("the type of the starting point should be either Subreddit or Redditor")
         self.start = starting_point
 
-    def _link_subs_to_subreddit(self, additional_subs=None):
-        codes = []
+    def _merge_and_link_submissions(self, submission_list):
+        submissions = []
+        subreddits = []
+        subreddit_links = []
+        authors = []
+        author_links = []
         props = {}
-        subs = self.start.submissions()
-        if additional_subs:
-            subs += additional_subs
-        for i in range(len(subs)):
-            codes.append(_link_nodes(
-                subs[i].data["id"],
-                subs[i].subreddit_id,
+
+        for sub in submission_list:
+            submissions.append(sub.merge_code())
+
+            subreddit_code = Subreddit(self.start.api, sub.subreddit_name, limit=None).merge_code()
+            if subreddit_code not in subreddits:
+                subreddits.append(subreddit_code)
+            
+            if sub.author_accessible:
+                author_code = sub.author.merge_code()
+                if author_code not in authors:
+                    authors.append(author_code)
+                
+                author_links.append(_link_nodes(
+                    sub.author_id,
+                    sub.data["id"],
+                    Relationships.authored,
+                    props
+                ))
+
+            subreddit_links.append(_link_nodes(
+                sub.data["id"],
+                sub.subreddit_id,
                 Relationships.under,
                 props
             ))
-        return codes
-
-    def _link_subs_to_authors(self, additional_subs=None):
-        codes = []
-        props = {}
-        subs = self.start.submissions()
-        if additional_subs:
-            subs += additional_subs
-        for i in range(len(subs)):
-            codes.append(_link_nodes(
-                subs[i].author_id,
-                subs[i].data["id"],
-                Relationships.authored,
-                props
-            ))
-        return codes
-
-    def _merge_nodes(self):
-        start = self.start
-        subreddits = list(set(Subreddit(start.api, sub.subreddit_name, limit=None).merge_code()
-                      for sub in start.submissions()))
-        submissions = list(set(sub.merge_code() for sub in start.submissions()))
-        authors = list(set(sub.author.merge_code() for sub in start.submissions()))
-        return subreddits + submissions + authors
+        
+        return subreddits + submissions + authors, subreddit_links + author_links
 
     def code(self):
-        code = self._merge_nodes()
-        code += self._link_subs_to_subreddit()
-        code += self._link_subs_to_authors()
-        return code
-
+        merges, links = self._merge_and_link_submissions(self.start.submissions())
+        return merges + links
 
 class Comments(Submissions):
     """
@@ -101,66 +102,52 @@ class Comments(Submissions):
         if isinstance(self.start, Subreddit):
             subs = self.start.submissions()
             return list(chain.from_iterable([sub.comments() for sub in subs]))
-        return self.start.comments()
+        elif isinstance(self.start, Redditor):
+            comment_list = []
+            for comment in self.start.comments():
+                comment_list = comment_list + _search_submission(comment, self.start.api)
+            return comment_list
+        else:
+            return self.start.comments()
 
-    def comment_subs(self):
-        return [Submission(self.start.api, comm.submission.id, limit=None)
-                for comm in self.comments()]
-
-    def comment_authors(self):
-        return [Redditor(self.start.api, comm.author.name, limit=None)
-                for comm in self.comments()]
-
-    def _link_comments_to_subs(self):
-        codes = []
+    def _merge_and_link_comments(self, comment_list):
+        comment_codes = []
+        parent_links = []
+        submissions = []
+        authors = []
+        author_links = []
         props = {}
-        comments = self.comments()
-        for i in range(len(comments)):
-            codes.append(_link_nodes(
-                comments[i].id,
-                comments[i].submission.id,
+        for comment in comment_list:
+            comment_instance = Comment(self.start.api, comment.id)
+            comment_codes.append(comment_instance.merge_code())
+
+            if comment_instance.author_accessible:
+                author_code = comment_instance.author.merge_code()
+                if author_code not in authors:
+                    authors.append(author_code)
+                
+                author_links.append(_link_nodes(
+                    comment_instance.author_id,
+                    comment.id,
+                    Relationships.authored,
+                    props
+                ))
+            
+            parent_links.append(_link_nodes(
+                comment.id,
+                comment.parent_id[3:],
                 Relationships.under,
                 props
             ))
-        return codes
 
-    def _link_authors_to_comms(self):
-        codes = []
-        props = {}
-        comments = self.comments()
-        for i in range(len(comments)):
-            codes.append(_link_nodes(
-                comments[i].author.id,
-                comments[i].id,
-                Relationships.authored,
-                props
-            ))
-        return codes
-
-    def _merge_nodes(self):
-        start = self.start
-        # Adding comments' submissions to start.submissions()
-        submissions = list(set(sub.merge_code() for sub in
-                       start.submissions() + self.comment_subs()))
-        # Getting subreddits and their authors for every submission
-        subreddits = list(set(Subreddit(start.api, sub.subreddit_name, limit=None).merge_code()
-                      for sub in start.submissions() + self.comment_subs()))
-        comments = list(set(Comment(start.api, comm.id).merge_code()
-                            for comm in self.comments()))
-        authors = [sub.author.merge_code() for sub in start.submissions()]
-        authors += [sub.author.merge_code() for sub in self.comment_subs()]
-        authors = list(set(authors))
-        # Adding commentor users
-        commentors = list(set(auth.merge_code() for auth in self.comment_authors()))
-        return subreddits + submissions + authors + commentors + comments
-
+            submissions.append(Submission(self.start.api, comment.submission.id, limit=None))
+        
+        return comment_codes + authors, parent_links + author_links, list(set(submissions))
+    
     def code(self):
-        code = self._merge_nodes()
-        code += self._link_subs_to_subreddit(additional_subs=self.comment_subs())
-        code += self._link_subs_to_authors(additional_subs=self.comment_subs())
-        code += self._link_comments_to_subs()
-        code += self._link_authors_to_comms()
-        return code
+        comment_merges, comment_links, submissions = self._merge_and_link_comments(self.comments())
+        sub_merges, sub_links = self._merge_and_link_submissions(submissions)
+        return comment_merges + sub_merges + comment_links + sub_links
 
 
 class CommentsReplies(Comments):
@@ -180,22 +167,27 @@ class CommentsReplies(Comments):
                             "Subreddit, Submission or Redditor")
         self.start = starting_point
 
-    def _link_replies_to_comms(self):
-        codes = []
-        props = {}
-        comments = self.comments()
-        for i in range(len(comments)):
-            replies = comments[i].replies
-            for j in range(len(replies)):
-                codes.append(_link_nodes(
-                    comments[i].id,
-                    replies[j].id,
-                    Relationships.under,
-                    props
-                ))
-        return codes
-
-    def code(self):
-        code = super().code()
-        code += self._link_replies_to_comms()
-        return code
+    def comments(self):
+        # Return comments as a Python list
+        if isinstance(self.start, Subreddit):
+            subs = self.start.submissions()
+            base_comment_list = list(chain.from_iterable([sub.comments() for sub in subs]))
+            full_comment_list = base_comment_list
+        elif isinstance(self.start, Redditor):
+            full_comment_list = []
+            comments = self.start.comments()
+            for comment in comments:
+                full_comment_list = full_comment_list + _search_submission(comment, self.start.api)
+            # We are interested in the replies of submissions too
+            subs = self.start.submissions()
+            sub_comments = list(chain.from_iterable([sub.comments() for sub in subs]))
+            base_comment_list = comments + sub_comments
+            full_comment_list = full_comment_list + base_comment_list
+        else:
+            base_comment_list = self.start.comments()
+            full_comment_list = base_comment_list
+        for comment in base_comment_list:
+            comment.refresh()
+            for reply in comment.replies:
+                full_comment_list.append(reply)
+        return full_comment_list

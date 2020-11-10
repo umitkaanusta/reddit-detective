@@ -20,10 +20,12 @@ def test_submission():
     assert sub.data["created_utc"]
     assert sub.main_type in sub.types
     assert sub.properties["created_utc"]
+    assert isinstance(sub.subreddit, Subreddit)
     assert sub.comments() is not None
-    assert isinstance(sub.author, Redditor)
     assert sub.score is not None
     assert sub.upvote_ratio is not None
+    assert sub.author_accessible, "Submission has no accessible author."
+    assert isinstance(sub.author, Redditor)
 
 
 def test_redditor():
@@ -43,11 +45,14 @@ def test_redditor():
 
 def test_comment():
     cd = Comment(api_, "ga5umu3")
+    cd_by_deleted = Comment(api_, "fo2ap22")
     assert cd.properties["text"]
-    assert isinstance(cd.author, Redditor)
     assert isinstance(cd.submission, Submission)
     assert cd.replies() is not None
     assert cd.score is not None
+    assert cd.author_accessible, "Comment has no accessible author."
+    assert isinstance(cd.author, Redditor)
+    assert not cd_by_deleted.author_accessible
 
 
 def test_cypher_codes_node():
