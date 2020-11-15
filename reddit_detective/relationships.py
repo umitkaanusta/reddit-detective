@@ -4,6 +4,7 @@ from itertools import chain
 from reddit_detective.data_models import Relationships
 from reddit_detective.data_models import Comment, Submission, Subreddit, Redditor
 
+
 def _link_nodes(first_id, second_id, rel_type, props_str):
     """
     Using ids of two nodes and rel type, create code for linking nodes
@@ -21,6 +22,7 @@ WITH n1, n2
 MERGE ((n1)-[:%s %s]->(n2));
 """ % (first_id, second_id, rel_type, props_str)
 
+
 def _search_submission(comment, api):
     comment_list = [comment]
     _comment = comment
@@ -28,6 +30,7 @@ def _search_submission(comment, api):
         _comment = api.comment(_comment.parent_id[3:])
         comment_list.append(_comment)
     return comment_list
+
 
 class Submissions:
     """
@@ -82,6 +85,7 @@ class Submissions:
     def code(self):
         merges, links = self._merge_and_link_submissions(self.start.submissions())
         return merges + links
+
 
 class Comments(Submissions):
     """
