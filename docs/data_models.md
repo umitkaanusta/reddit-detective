@@ -1,7 +1,5 @@
 # Data Models
-reddit-detective defines classes to denote a "Node" in the Reddit Network.
-
-By using "Node"s as mediators, we ease the process of converting 
+By defining some data models, we ease the process of converting 
 Reddit data to Cypher (Neo4j's query language) code.
 
 
@@ -55,7 +53,7 @@ list of strings in available_types attribute of each major type.
         - Replies to comments are Comment objects too
     - Properties: `"id", "created_utc", "text", "is_submitter", "stickied"`
     
-## Sample Code
+## Code Sample
 ```python
 from reddit_detective.data_models import Subreddit
 
