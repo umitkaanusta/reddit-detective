@@ -3,6 +3,7 @@
 ![Neo4j version](https://badgen.net/badge/neo4j/v4.1.0/cyan)
 ![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
 ![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)
+[![Documentation Status](https://readthedocs.org/projects/reddit-detective/badge/?version=latest)](https://reddit-detective.readthedocs.io/en/latest/?badge=latest)
 
 ```
 pip install reddit_detective
