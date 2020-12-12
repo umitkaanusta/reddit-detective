@@ -1,0 +1,23 @@
+site_name: reddit-detective
+site_url: https://reddit-detective.readthedocs.io
+site_description: Play detective on Reddit
+
+repo_url: https://github.com/umitkaanusta/reddit-detective
+edit_uri: ""
+
+theme:
+  name: readthedocs
+  highlightjs: true
+  hljs_languages:
+    - python
+
+nav:
+  - Home: docs/index.md
+  - User Guide:
+      - Data Models: docs/data_models.md
+      - Relationships: docs/relationships.md
+      - Network: docs/network.md
+      - Analytics:
+          - Metrics: docs/analytics/metrics.md
+  - About:
+      - Contributing: CONTRIBUTING.md

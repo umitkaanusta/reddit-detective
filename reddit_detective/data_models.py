@@ -20,7 +20,7 @@ Node types:
         
 Relationship types:
     MODERATES (Redditor -> Subreddit) (No properties)
-    UNDER (Submission -> Subreddit) OR (Comment -> Comment) (No properties)
+    UNDER (Submission -> Subreddit) OR (Submission -> Comment) OR (Comment -> Comment) (No properties)
     AUTHORED (Redditor -> Submission) OR (Redditor -> Comment) (No properties)
     
 Textual properties are stripped from some certain punctuation marks 
