@@ -11,7 +11,7 @@ theme:
     - python
 
 nav:
-  - Home: ../README.md
+  - Home: index.md
   - User Guide:
       - Data Models: data_models.md
       - Relationships: relationships.md
@@ -19,4 +19,4 @@ nav:
       - Analytics:
           - Metrics: ./analytics/metrics.md
   - About:
-      - Contributing: ../CONTRIBUTING.md
+      - Contributing: contributing.md

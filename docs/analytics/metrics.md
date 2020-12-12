@@ -4,6 +4,7 @@ the anatomy of the social network.
 
 ## Interaction score
 For a Redditor in the graph,
+
 - Interaction score = # Comments received / (# Comments received + # Comments made)
 - Score close to 0: User is a **starter**
 - Score close to 1: User is a **consumer**
@@ -25,6 +26,7 @@ print(score_norm) # 0.057324840764331204
 
 ## Cyborg score
 For a Redditor, Submission or a Subreddit in the graph,
+
 - Cyborg score = # Cyborg-like comments / # All comments 
 - Cyborg-like comment: Comment posted under a submission within 6 seconds of its creation
 

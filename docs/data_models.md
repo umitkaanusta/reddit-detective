@@ -36,16 +36,19 @@ list of strings in available_types attribute of each major type.
     - Available degrees: Submissions, Comments, Replies
     - Properties: `"id", "username", "created_utc", "has_verified_email", "employee", "suspended"`
         - If suspended: `"id", "username", "employee", "suspended"`
-    
+
+
 - **Submission** (Inherits from a helper class SubOrComment which inherits from Node)
     - Available types: Archived, Stickied, Locked, Over18
     - Available degrees: Comments, Replies
     - Properties: `"id", "created_utc", "title", "text", "archived", "stickied", "locked", "over18"`
-    
+
+  
 - **Subreddit** (Inherits from Node)
     - Available types: Over18
     - Available degrees: Submissions, Comments, Replies
     - Properties: `"id", "created_utc", "name", "over18", "desc"`
+
 
 - **Comment** (Inherits from a helper class SubOrComment which inherits from Node)
     - Comments do not have minor types

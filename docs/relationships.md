@@ -1,12 +1,13 @@
 # Relationships
 Relationships in reddit-detective are essential because of two reasons:
+
 1. That's the way how we navigate in the social network graph
+
     - Example: Assume Jack loves Tina and Tina loves Harry. 
     We can show this as **Jack-[Loves]->Tina-[Loves]->Harry**
     (not the actual way of showing relationships in Cypher, treat this as some form of a pseudocode)
     - Now assume that we're going to look for the percentage of bi-directional "Loves" relationships.
     We'll do the counting by using "roads" created by nodes and relationships.
-    
 2. They are mediators just like Nodes (see Data Models for detailed explanation of a mediator)
 
 ## How do Relationships work?
@@ -48,9 +49,11 @@ subs = Submissions(Redditor(api_, "Anub_Rekhan", limit=2))
 subs.code()  # Returns the generated Cypher code 
 ```
 **Q: How can I run this Cypher code and see the results in my Neo4j database?**
+
 - You can only run Cypher codes through RedditNetwork objects,
 see Network for detailed information
 
 **Q: Why can't I run the Cypher code without a RedditNetwork object?**
+
 - RedditNetwork objects are also a gate to solve the Karma Problem we've encountered.
 What is that? - See Network for detailed information. 

@@ -3,6 +3,7 @@ reddit-detective creates a social network graph by using Nodes and Degrees.
 However, creating nodes and connecting them is not enough for our case.
 
 We have to:
+
 - Define constraints for the health of our database
 - Solve the Karma Problem
 - Provide an intuitive way of creating a social network graph
@@ -38,6 +39,7 @@ karmas/upvotes/subscribers for security purposes. This leads to having different
 in 2 MERGE statements for the same Subreddit, thus violating a constraint.
 
 **What is our solution?**
+
 - Do not include stuff like karma in properties at creation time
 - After creation, get each node/rel's stuff like karma and add to their props
 - **What if the user adds more stuff to their database?**
