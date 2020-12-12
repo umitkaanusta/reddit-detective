@@ -11,12 +11,12 @@ theme:
     - python
 
 nav:
-  - Home: README.md
+  - Home: ../README.md
   - User Guide:
-      - Data Models: ./docs/data_models.md
-      - Relationships: ./docs/relationships.md
-      - Network: ./docs/network.md
+      - Data Models: data_models.md
+      - Relationships: relationships.md
+      - Network: network.md
       - Analytics:
-          - Metrics: ./docs/analytics/metrics.md
+          - Metrics: ./analytics/metrics.md
   - About:
-      - Contributing: CONTRIBUTING.md
+      - Contributing: ../CONTRIBUTING.md
