@@ -162,7 +162,7 @@ class CommentsReplies(Comments):
     Starting points: Subreddit, Submission, Redditor
         All of Degree 2
         For all comments, get the list of replies
-        Link redditors to redditors thru which one replied to other (REPLIED)
+        Link comments to replies (which are also comments) with UNDER relationship
     """
     def __init__(self, starting_point: Union[Subreddit, Submission, Redditor]):
         if "replies" not in starting_point.available_degrees:

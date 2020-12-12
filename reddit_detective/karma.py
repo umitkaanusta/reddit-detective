@@ -1,5 +1,5 @@
 """
-Let's assume that you get subreddits of 2 comments
+Let's assume that you get the subreddits they belong for 2 comments
 
 Terminology: "stuff like karma" includes
 comment_karma, link_karma, score, upvote_ratio and subscribers

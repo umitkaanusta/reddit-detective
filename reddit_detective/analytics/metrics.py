@@ -40,7 +40,8 @@ def interaction_score_normalized(driver: BoltDriver, username):
 
 def _cyborg_score(driver: BoltDriver, name, util_func) -> tuple:
     """
-    Calculates the ratio of cyborg-like comments to all comments of the user
+    Calculates the ratio of cyborg-like comments to all comments of the user.
+
     Tuple's first element is the score, second element is a list of
     ids of the cyborg-like comments.
 
@@ -54,7 +55,7 @@ def _cyborg_score(driver: BoltDriver, name, util_func) -> tuple:
     This information is extracted by looking at the character sizes of those
     comments.
 
-    Cyborg-like comments can also be an advertisement,
+    A Cyborg-like comment can also be an advertisement,
     AutoModerator post or a copy-paste.
     """
     cyborg_comms = []
