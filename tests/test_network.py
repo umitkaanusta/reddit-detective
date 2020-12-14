@@ -19,6 +19,7 @@ def test_network():
         ]
     )
     assert net
+    assert len(set(net._codes())) == len(net._codes())
     assert net.cypher_code()
     net.run_cypher_code()
 
