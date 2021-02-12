@@ -17,7 +17,10 @@ _CONSTRAINTS = [
         ON (sm:Submission) ASSERT (sm.id) IS UNIQUE;""",
     
     """CREATE CONSTRAINT UniqueSubreddit
-        ON (sr:Subreddit) ASSERT (sr.id) IS UNIQUE;"""
+        ON (sr:Subreddit) ASSERT (sr.id) IS UNIQUE;""",
+
+    """CREATE CONSTRAINT UniqueComment
+        ON (c:Comment) ASSERT (c.id) IS UNIQUE;"""
 ]
 
 
