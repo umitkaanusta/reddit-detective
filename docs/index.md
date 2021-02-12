@@ -29,6 +29,7 @@ how Redditors behave.
 Knowing Cypher dramatically increases what you can do with reddit-detective 
 [Click here to learn Cypher](https://neo4j.com/graphacademy/online-training/introduction-to-neo4j-40/)
 - Install reddit-detective with `pip install reddit_detective`
+    - **Note:** Version 0.1.2 is broken, any other version is fine
 
 
 ## Code Samples
