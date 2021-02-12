@@ -92,7 +92,7 @@ class Comments(Submissions):
     Degree 2: Comments
     Starting points: Subreddit, Submission, Redditor
         All of Degree 1
-        Link redditors with subreddits via comments (COMMENTED)
+        Link redditors with submissions via comments (AUTHORED)
     """
     def __init__(self, starting_point: Union[Subreddit, Submission, Redditor]):
         if "comments" not in starting_point.available_degrees:
