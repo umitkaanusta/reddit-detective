@@ -17,10 +17,7 @@ _CONSTRAINTS = [
         ON (sm:Submission) ASSERT (sm.id) IS UNIQUE;""",
     
     """CREATE CONSTRAINT UniqueSubreddit
-        ON (sr:Subreddit) ASSERT (sr.id) IS UNIQUE;""",
-
-    """CREATE CONSTRAINT UniqueComment
-        ON (c:Comment) ASSERT (c.id) IS UNIQUE;"""
+        ON (sr:Subreddit) ASSERT (sr.id) IS UNIQUE;"""
 ]
 
 
@@ -80,7 +77,10 @@ class RedditNetwork:
         """
         Get codes for every component
         """
-        return list(chain.from_iterable([point.code() for point in self.components]))
+        codes = list(chain.from_iterable([point.code() for point in self.components]))
+        # Remove duplicates without changing order
+        codes = sorted(set(codes), key=lambda x: codes.index(x))
+        return codes
 
     def cypher_code(self):
         """
