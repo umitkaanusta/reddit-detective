@@ -84,7 +84,7 @@ class Submissions:
 
     def code(self):
         merges, links = self._merge_and_link_submissions(self.start.submissions())
-        return list(set(merges + links))
+        return merges + links
 
 
 class Comments(Submissions):
@@ -92,7 +92,7 @@ class Comments(Submissions):
     Degree 2: Comments
     Starting points: Subreddit, Submission, Redditor
         All of Degree 1
-        Link redditors with subreddits via comments (COMMENTED)
+        Link redditors with submissions via comments (AUTHORED)
     """
     def __init__(self, starting_point: Union[Subreddit, Submission, Redditor]):
         if "comments" not in starting_point.available_degrees:
@@ -129,14 +129,14 @@ class Comments(Submissions):
                 author_code = comment_instance.author.merge_code()
                 if author_code not in authors:
                     authors.append(author_code)
-
+                
                 author_links.append(_link_nodes(
                     comment_instance.author_id,
                     comment.id,
                     Relationships.authored,
                     props
                 ))
-
+            
             parent_links.append(_link_nodes(
                 comment.id,
                 comment.parent_id[3:],
@@ -144,14 +144,16 @@ class Comments(Submissions):
                 props
             ))
 
-            submissions.append(Submission(self.start.api, comment.submission.id, limit=None))
-
-        return comment_codes + authors, parent_links + author_links, list(set(submissions))
+            sub = Submission(self.start.api, comment.submission.id, limit=None)
+            if sub not in submissions:
+                submissions.append(sub)
+        
+        return comment_codes + authors, parent_links + author_links, submissions
     
     def code(self):
         comment_merges, comment_links, submissions = self._merge_and_link_comments(self.comments())
         sub_merges, sub_links = self._merge_and_link_submissions(submissions)
-        return list(set(comment_merges + sub_merges + comment_links + sub_links))
+        return comment_merges + sub_merges + comment_links + sub_links
 
 
 class CommentsReplies(Comments):

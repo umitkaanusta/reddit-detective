@@ -80,7 +80,10 @@ class RedditNetwork:
         """
         Get codes for every component
         """
-        return list(chain.from_iterable([point.code() for point in self.components]))
+        codes = list(chain.from_iterable([point.code() for point in self.components]))
+        # Remove duplicates without changing order
+        codes = sorted(set(codes), key=lambda x: codes.index(x))
+        return codes
 
     def cypher_code(self):
         """
