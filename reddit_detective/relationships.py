@@ -3,6 +3,7 @@ from itertools import chain
 
 from reddit_detective.data_models import Relationships
 from reddit_detective.data_models import Comment, Submission, Subreddit, Redditor
+from praw.models import MoreComments
 
 
 def _link_nodes(first_id, second_id, rel_type, props_str):
@@ -193,6 +194,9 @@ class CommentsReplies(Comments):
             base_comment_list = self.start.comments()
             full_comment_list = base_comment_list
         for comment in base_comment_list:
+            if isinstance(comment, MoreComments):
+                base_comment_list += comment.comments()
+                continue
             comment.refresh()
             for reply in comment.replies:
                 full_comment_list.append(reply)
