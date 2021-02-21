@@ -55,7 +55,9 @@ class Submissions:
         author_links = []
         props = {}
 
-        for sub in submission_list:
+        unique_subs = {sub.data["id"]: sub for sub in submission_list}.values()
+
+        for sub in unique_subs:
             submissions.append(sub.merge_code())
 
             subreddit_code = Subreddit(self.start.api, sub.subreddit_name, limit=None).merge_code()
@@ -66,7 +68,7 @@ class Submissions:
                 author_code = sub.author.merge_code()
                 if author_code not in authors:
                     authors.append(author_code)
-                
+
                 author_links.append(_link_nodes(
                     sub.author_id,
                     sub.data["id"],
