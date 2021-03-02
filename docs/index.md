@@ -6,7 +6,6 @@
 [![Documentation Status](https://readthedocs.org/projects/reddit-detective/badge/?version=latest)](https://reddit-detective.readthedocs.io/en/latest/?badge=latest)
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=umitkaanusta_reddit-detective&metric=alert_status)](https://sonarcloud.io/dashboard?id=umitkaanusta_reddit-detective)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=umitkaanusta_reddit-detective&metric=coverage)](https://sonarcloud.io/dashboard?id=umitkaanusta_reddit-detective)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=umitkaanusta_reddit-detective&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=umitkaanusta_reddit-detective)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=umitkaanusta_reddit-detective&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=umitkaanusta_reddit-detective)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=umitkaanusta_reddit-detective&metric=sqale_index)](https://sonarcloud.io/dashboard?id=umitkaanusta_reddit-detective)
