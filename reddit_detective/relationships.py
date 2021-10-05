@@ -1,5 +1,6 @@
 from typing import Union
 from itertools import chain
+from typing import List
 
 from reddit_detective.data_models import Relationships
 from reddit_detective.data_models import Comment, Submission, Subreddit, Redditor
@@ -24,12 +25,12 @@ MERGE ((n1)-[:%s %s]->(n2));
 """ % (first_id, second_id, rel_type, props_str)
 
 
-def _search_submission(comment, api):
+def _search_submission(comment):
     comment_list = [comment]
-    _comment = comment
-    while _comment.parent_id[3:] != _comment.submission.id:
-        _comment = api.comment(_comment.parent_id[3:])
-        comment_list.append(_comment)
+    curr = comment
+    while curr.parent_id[:3] != "t3_":  # if the comment is not a top level comment:
+        curr = curr.parent
+        comment_list.append(curr)
     return comment_list
 
 
@@ -47,7 +48,7 @@ class Submissions:
             raise TypeError("the type of the starting point should be either Subreddit or Redditor")
         self.start = starting_point
 
-    def _merge_and_link_submissions(self, submission_list):
+    def _merge_and_link_submissions(self, submission_list: List[Submission]):
         submissions = []
         subreddits = []
         subreddit_links = []
@@ -55,12 +56,12 @@ class Submissions:
         author_links = []
         props = {}
 
-        unique_subs = {sub.data["id"]: sub for sub in submission_list}.values()
+        unique_subs = {sub.properties["id"]: sub for sub in submission_list}.values()
 
         for sub in unique_subs:
             submissions.append(sub.merge_code())
 
-            subreddit_code = Subreddit(self.start.api, sub.subreddit_name, limit=None).merge_code()
+            subreddit_code = sub.subreddit.merge_code()
             if subreddit_code not in subreddits:
                 subreddits.append(subreddit_code)
             
@@ -71,13 +72,13 @@ class Submissions:
 
                 author_links.append(_link_nodes(
                     sub.author_id,
-                    sub.data["id"],
+                    sub.properties["id"],
                     Relationships.authored,
                     props
                 ))
 
             subreddit_links.append(_link_nodes(
-                sub.data["id"],
+                sub.properties["id"],
                 sub.subreddit_id,
                 Relationships.under,
                 props
@@ -109,49 +110,46 @@ class Comments(Submissions):
         if isinstance(self.start, Subreddit):
             subs = self.start.submissions()
             return list(chain.from_iterable([sub.comments() for sub in subs]))
-        elif isinstance(self.start, Redditor):
-            comment_list = []
-            for comment in self.start.comments():
-                comment_list = comment_list + _search_submission(comment, self.start.api)
-            return comment_list
         else:
             return self.start.comments()
 
-    def _merge_and_link_comments(self, comment_list):
+    def _merge_and_link_comments(self, comment_list: List[Comment]):
         comment_codes = []
         parent_links = []
         submissions = []
-        authors = []
+        submission_ids = {}
+        author_codes = []
+        author_ids = {}
         author_links = []
         props = {}
-        for comment in comment_list:
-            comment_instance = Comment(self.start.api, comment.id)
-            comment_codes.append(comment_instance.merge_code())
 
-            if comment_instance.author_accessible:
-                author_code = comment_instance.author.merge_code()
-                if author_code not in authors:
-                    authors.append(author_code)
+        for comment in comment_list:
+            comment_codes.append(comment.merge_code())
+
+            if comment.author_accessible:
+                if comment.author_id not in author_ids:
+                    author_ids[comment.author_id] = True
+                    author_codes.append(comment.author.merge_code())
                 
                 author_links.append(_link_nodes(
-                    comment_instance.author_id,
-                    comment.id,
+                    comment.author_id,
+                    comment.properties["id"],
                     Relationships.authored,
                     props
                 ))
             
             parent_links.append(_link_nodes(
-                comment.id,
-                comment.parent_id[3:],
+                comment.properties["id"],
+                comment.submission_id,
                 Relationships.under,
                 props
             ))
 
-            sub = Submission(self.start.api, comment.submission.id, limit=None)
-            if sub not in submissions:
-                submissions.append(sub)
+            if comment.submission_id not in submission_ids:
+                submission_ids[comment.submission_id] = True
+                submissions.append(comment.submission)
         
-        return comment_codes + authors, parent_links + author_links, submissions
+        return comment_codes + author_codes, parent_links + author_links, submissions
     
     def code(self):
         comment_merges, comment_links, submissions = self._merge_and_link_comments(self.comments())
@@ -186,12 +184,13 @@ class CommentsReplies(Comments):
             full_comment_list = []
             comments = self.start.comments()
             for comment in comments:
-                full_comment_list = full_comment_list + _search_submission(comment, self.start.api)
+                full_comment_list = full_comment_list + _search_submission(comment)
             # We are interested in the replies of submissions too
             subs = self.start.submissions()
             sub_comments = list(chain.from_iterable([sub.comments() for sub in subs]))
             base_comment_list = comments + sub_comments
             full_comment_list = full_comment_list + base_comment_list
+            full_comment_list = list(set(full_comment_list))
         else:
             base_comment_list = self.start.comments()
             full_comment_list = base_comment_list
@@ -199,7 +198,54 @@ class CommentsReplies(Comments):
             if isinstance(comment, MoreComments):
                 base_comment_list += comment.comments()
                 continue
-            comment.refresh()
-            for reply in comment.replies:
-                full_comment_list.append(reply)
+            try:
+                comment.refresh()
+                for reply in comment.replies:
+                    full_comment_list.append(reply)
+            except AttributeError:
+                for reply in comment.replies():
+                    full_comment_list.append(reply)
         return full_comment_list
+
+    def _merge_and_link_comments(self, comment_list: List[Comment]):
+        comment_codes = []
+        parent_links = []
+        submissions = []
+        submission_ids = {}
+        author_codes = []
+        author_ids = {}
+        author_links = []
+        props = {}
+
+        for comment in comment_list:
+            comment_codes.append(comment.merge_code())
+
+            if comment.author_accessible:
+                if comment.author_id not in author_ids:
+                    author_ids[comment.author_id] = True
+                    author_codes.append(comment.author.merge_code())
+
+                author_links.append(_link_nodes(
+                    comment.author_id,
+                    comment.properties["id"],
+                    Relationships.authored,
+                    props
+                ))
+
+            parent_links.append(_link_nodes(
+                comment.properties["id"],
+                comment.parent_id,
+                Relationships.under,
+                props
+            ))
+
+            if comment.submission_id not in submission_ids:
+                submission_ids[comment.submission_id] = True
+                submissions.append(comment.submission)
+
+        return comment_codes + author_codes, parent_links + author_links, submissions
+
+    def code(self):
+        comment_merges, comment_links, submissions = self._merge_and_link_comments(self.comments())
+        sub_merges, sub_links = self._merge_and_link_submissions(submissions)
+        return comment_merges + sub_merges + comment_links + sub_links
