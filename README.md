@@ -40,6 +40,7 @@ Knowing Cypher dramatically increases what you can do with reddit-detective
 ## Code Samples
 
 ### Creating a Reddit network graph
+**Note:** Neo4j uses PRAW (Python Reddit API Wrapper) to call the Reddit API. Each API call may have some delay, so using reddit-detective to collect large data might be unscalable for now. **Functionality to convert tabular Reddit data to network graph will be added.**
 ```python
 import praw
 from neo4j import GraphDatabase
@@ -132,13 +133,15 @@ session.close()
 
 
 ## Upcoming features
+- [ ] Convert any tabular Reddit data to Neo4j Graph with given instructions from the user
 - [ ] UserToUser relationships
     - A relationship to link users with its only property being the amount of **encounters**
     - Having ties with the same submission is defined as an **encounter**
+- [ ] Add more paper-inspired metrics
 - [ ] Create a wrapper for centrality metrics of Neo4j GDSC (Graph data science library)
 
 
-## Inspirations
+## Inspiration
 List of works/papers that inspired reddit-detective:
 ```
 authors: [Sachin Thukral (TCS Research), Hardik Meisheri (TCS Research),
