@@ -208,42 +208,10 @@ class CommentsReplies(Comments):
         return full_comment_list
 
     def _merge_and_link_comments(self, comment_list: List[Comment]):
-        comment_codes = []
-        parent_links = []
-        submissions = []
-        submission_ids = {}
-        author_codes = []
-        author_ids = {}
-        author_links = []
-        props = {}
-
-        for comment in comment_list:
-            comment_codes.append(comment.merge_code())
-
-            if comment.author_accessible:
-                if comment.author_id not in author_ids:
-                    author_ids[comment.author_id] = True
-                    author_codes.append(comment.author.merge_code())
-
-                author_links.append(_link_nodes(
-                    comment.author_id,
-                    comment.properties["id"],
-                    Relationships.authored,
-                    props
-                ))
-
-            parent_links.append(_link_nodes(
-                comment.properties["id"],
-                comment.parent_id,
-                Relationships.under,
-                props
-            ))
-
-            if comment.submission_id not in submission_ids:
-                submission_ids[comment.submission_id] = True
-                submissions.append(comment.submission)
-
-        return comment_codes + author_codes, parent_links + author_links, submissions
+        # to reduce duplication
+        # and doing it this way performs better than
+        # directly using the inherited method instead of overriding (?)
+        return super()._merge_and_link_comments(comment_list)
 
     def code(self):
         comment_merges, comment_links, submissions = self._merge_and_link_comments(self.comments())

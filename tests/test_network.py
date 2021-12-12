@@ -16,12 +16,12 @@ def test_network_creation():
     net = RedditNetwork(
         driver=driver_,
         components=[
-            Comments(Redditor(api_, "BloodMooseSquirrel", limit=5)),
+            # Comments(Redditor(api_, "BloodMooseSquirrel", limit=5)),
             Comments(Redditor(api_, "Anub_Rekhan", limit=5))
         ]
     )
-    assert net
-    assert net.cypher_code()
+    # assert net
+    # net.cypher_code()
     net.run_cypher_code()
 
 
@@ -45,8 +45,8 @@ def test_code_uniqueness():
 
 
 def run():
-    test_code_uniqueness()
-    # test_network_creation()
+    # test_code_uniqueness()
+    test_network_creation()
 
 
 if __name__ == '__main__':

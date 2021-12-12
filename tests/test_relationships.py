@@ -17,26 +17,34 @@ from tests import api_
 
 
 def test_submissions():
-    red = Redditor(api_, "Anub_Rekhan", limit=2)
-    submissions_red = Submissions(red)
-    sub = Subreddit(api_, "learnpython", limit=2)
+    sub = Subreddit.from_base_obj(api_.subreddit("learnpython"), 2)
     submissions_sub = Submissions(sub)
-    assert submissions_red.code()
     assert submissions_sub.code()
+    red = Redditor.from_base_obj(api_.redditor("Anub_Rekhan"), 2)
+    submissions_red = Submissions(red)
+    assert submissions_red.code()
 
 
 def test_comments():
-    red = Redditor(api_, "Anub_Rekhan", limit=2, indexing="new")
+    sub = Subreddit.from_base_obj(api_.subreddit("learnpython"), 2)
+    comments_sub = Comments(sub)
+    assert comments_sub.comments()
+    assert comments_sub.code()
+    red = Redditor.from_base_obj(api_.redditor("Anub_Rekhan"), 2)
     comments_red = Comments(red)
     assert comments_red.comments()
     assert comments_red.code()
 
 
 def test_replies():
-    sub = Subreddit(api_, "learnpython", limit=2, indexing="hot")
+    sub = Subreddit.from_base_obj(api_.subreddit("learnpython"), 2)
     replies_sub = CommentsReplies(sub)
     assert replies_sub.comments()
     assert replies_sub.code()
+    red = Redditor.from_base_obj(api_.redditor("Anub_Rekhan"), 2)
+    replies_red = CommentsReplies(red)
+    assert replies_red.comments()
+    assert replies_red.code()
 
 
 def run():
