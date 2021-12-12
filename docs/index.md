@@ -40,7 +40,7 @@ Knowing Cypher dramatically increases what you can do with reddit-detective
 ## Code Samples
 
 ### Creating a Reddit network graph
-**Note:** Neo4j uses PRAW (Python Reddit API Wrapper) to call the Reddit API. Each API call may have some delay, so using reddit-detective to collect large data might be unscalable for now. **Functionality to convert tabular Reddit data to network graph will be added.**
+**Note:** Due to limitations of the Reddit API, Each API call may have some delay, so using reddit-detective to collect large data might be unscalable for now. **Functionality to convert tabular Reddit data to network graph will be added.**
 ```python
 import praw
 from neo4j import GraphDatabase
