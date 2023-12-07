@@ -11,16 +11,16 @@ from reddit_detective.karma import (_remove_karma, _set_karma_subreddits, _set_k
 # Do not alter
 _CONSTRAINTS = [
     """CREATE CONSTRAINT UniqueRedditor
-        ON (r:Redditor) ASSERT (r.id) IS UNIQUE;""",
+        FOR (r:Redditor) REQUIRE (r.id) IS UNIQUE;""",
     
     """CREATE CONSTRAINT UniqueSubmission
-        ON (sm:Submission) ASSERT (sm.id) IS UNIQUE;""",
+        FOR (sm:Submission) REQUIRE (sm.id) IS UNIQUE;""",
     
     """CREATE CONSTRAINT UniqueSubreddit
-        ON (sr:Subreddit) ASSERT (sr.id) IS UNIQUE;""",
+        FOR (sr:Subreddit) REQUIRE (sr.id) IS UNIQUE;""",
 
     """CREATE CONSTRAINT UniqueComment
-        ON (c:Comment) ASSERT (c.id) IS UNIQUE;"""
+        FOR (c:Comment) REQUIRE (c.id) IS UNIQUE;"""
 ]
 
 
